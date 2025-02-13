@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { Analytics } from "@vercel/analytics/react"
+
 import { Nunito } from '@next/font/google';
 
 const nunito = Nunito({
@@ -59,6 +61,7 @@ export default function RootLayout({
             </SidebarInset>
           </SidebarProvider>
         </AlertProvider>
+        <Analytics />
       </body>
     </html>
   )

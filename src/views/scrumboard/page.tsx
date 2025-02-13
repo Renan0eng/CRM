@@ -311,7 +311,7 @@ export default function TasksPage() {
               {...provided.droppableProps}
               className="flex gap-4 flex-row w-full"
             >
-              <div className="flex gap-4 flex-row w-fit">
+              <div className="flex gap-4 flex-row h-fit">
                 {Object.entries(columns).map(([id, column], index) => (
                   <Draggable key={id} draggableId={id} index={index}>
                     {(provided) => (
