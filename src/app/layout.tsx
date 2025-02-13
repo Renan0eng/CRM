@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar"
 import { AlertProvider } from "@/hooks/use-alert";
 import { GlobalAlert } from "@/components/Alert";
+import { BreadcrumbDynamic } from "@/components/Breadcrumb";
 
 export default function RootLayout({
   children,
@@ -49,19 +50,7 @@ export default function RootLayout({
                 <div className="flex items-center gap-2 px-4">
                   <SidebarTrigger className="-ml-1" />
                   <Separator orientation="vertical" className="mr-2 h-4" />
-                  <Breadcrumb>
-                    <BreadcrumbList>
-                      <BreadcrumbItem className="hidden md:block">
-                        <BreadcrumbLink href="#" className="text-text">
-                          Building Your Application
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                      <BreadcrumbSeparator className="hidden md:block text-text" />
-                      <BreadcrumbItem>
-                        <BreadcrumbPage className="text-text">Data Fetching</BreadcrumbPage>
-                      </BreadcrumbItem>
-                    </BreadcrumbList>
-                  </Breadcrumb>
+                  <BreadcrumbDynamic />
                 </div>
               </header>
               <div className="w-full h-[calc(100vh-84px)]">
