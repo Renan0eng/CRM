@@ -34,8 +34,7 @@ model Column {
 
 model User {
   id             Int       @id @default(autoincrement())
-  first_name     String
-  last_name      String
+  name           String
   avatar         String?
   email          String    @unique
   password       String

@@ -14,7 +14,7 @@ import {
 
 export function BreadcrumbDynamic() {
   const pathname = usePathname();
-  const pathSegments = pathname.split("/").filter((segment) => segment);
+  const pathSegments = pathname.replace("/admin", "").split("/").filter((segment) => segment);
 
 
   <Breadcrumb>
@@ -36,14 +36,14 @@ export function BreadcrumbDynamic() {
       <BreadcrumbList >
         {/* Link para a página inicial */}
         <BreadcrumbItem className="hidden md:block">
-          <BreadcrumbLink href="/" className="text-text">
+          <BreadcrumbLink href="/admin" className="text-text">
             Home
           </BreadcrumbLink>
         </BreadcrumbItem>
 
         {/* Gera os itens do breadcrumb com base nos segmentos do caminho */}
         {pathSegments.map((segment, index) => {
-          const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
+          const href = `/admin/${pathSegments.slice(0, index + 1).join("/")}`;
           const isLastSegment = index === pathSegments.length - 1;
 
           return (

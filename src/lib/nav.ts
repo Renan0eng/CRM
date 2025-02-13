@@ -24,7 +24,7 @@ export const data = {
         // },
         {
           title: "Scrumboard",
-          url: "/tools/scrumboard",
+          url: "admin/tools/scrumboard",
         },
       ],
     },
