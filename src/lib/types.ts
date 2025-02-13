@@ -146,6 +146,7 @@ type Column = {
   id: string;
   name: string;
   tasks: Task[];
+  index: number;
 };
 
 type Columns = {

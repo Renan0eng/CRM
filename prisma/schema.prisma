@@ -29,6 +29,7 @@ model Column {
   id    String @id @default(cuid())
   name  String
   tasks Task[] @relation("ColumnTask")
+  index Int
 }
 
 model User {

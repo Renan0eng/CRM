@@ -23,6 +23,9 @@ export async function createOrEdit(data: CreateOrEditTask) {
 
 export async function getColumns() {
   const columns = await prisma.column.findMany({
+    orderBy: {
+      index: "asc",
+    },
     include: {
       tasks: {
         orderBy: {
@@ -35,9 +38,36 @@ export async function getColumns() {
   return columns;
 }
 
-export async function createOrEditColumn(data: { name: string }) {
+export async function createOrEditColumn(data: {
+  name: string;
+  index?: number;
+  id?: string;
+}) {
+  if (data.id) {
+    const column = await prisma.column.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        ...data,
+      },
+      include: {
+        tasks: true,
+      },
+    });
+
+    return column;
+  }
+  const lastColumn = await prisma.column.findFirst({
+    orderBy: {
+      index: "desc",
+    },
+  });
   const column = await prisma.column.create({
-    data,
+    data: {
+      ...data,
+      index: lastColumn ? lastColumn?.index + 1 : 0,
+    },
     include: {
       tasks: true,
     },

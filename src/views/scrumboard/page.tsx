@@ -61,22 +61,50 @@ export default function TasksPage() {
     return result;
   };
 
+  const reorderColumns = (sourceIndex: number, destinationIndex: number) => {
+    const columnIds = Object.keys(columns);
+    const reorderedIds = Array.from(columnIds);
+    const [removed] = reorderedIds.splice(sourceIndex, 1);
+    reorderedIds.splice(destinationIndex, 0, removed);
+
+    const newColumns: Columns = {};
+    reorderedIds.forEach((id) => {
+      newColumns[id] = columns[id];
+    });
+
+    Object.entries(newColumns).forEach(([columnId, column], index) => {
+      const { id, name } = column
+      createOrEditColumn({
+        id,
+        name,
+        index,
+      });
+    });
+
+    setColumns(newColumns);
+  };
+
   const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
+    const { source, destination, type } = result;
 
-    console.log("{ source, destination }", { source, destination });
-
+    // Se não houver destino, não fazemos nada
     if (!destination) return;
 
+    // Reordenar colunas
+    if (type === "COLUMN") {
+      reorderColumns(source.index, destination.index);
+      return;
+    }
+
+    // Reordenar tarefas dentro das colunas
     if (source.droppableId === destination.droppableId) {
       const column = columns[source.droppableId];
-      const copiedTasks = reorder(column.tasks, source.index, destination.index);
-
+      const reorderedTasks = reorder(column.tasks, source.index, destination.index);
       setColumns({
         ...columns,
         [source.droppableId]: {
           ...column,
-          tasks: copiedTasks,
+          tasks: reorderedTasks,
         },
       });
     } else {
@@ -118,6 +146,7 @@ export default function TasksPage() {
 
     }
   };
+
 
   const addColumn = async (columnId: string) => {
     const newColumn = await createOrEditColumn({
@@ -265,6 +294,7 @@ export default function TasksPage() {
   };
 
 
+
   return (
     <div className="w-full p-8 flex flex-col gap-4 max-h-full scrollable overflow-scroll">
       {/* Btn new collun */}
@@ -274,59 +304,81 @@ export default function TasksPage() {
         setNewcolumnId={setNewcolumnId}
       />
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4 flex-row w-fit">
-          {Object.entries(columns).map(([id, column]) => (
-            <Droppable droppableId={id}>
-              {(provided, snapshot) => (
-                <div key={id} className="flex flex-col w-80 h-full gap-4 bg-background-foreground p-4 rounded-md"
-                >
-                  {/* Header coluna */}
-                  <div className="flex justify-between items-center">
-                    <h1 className="text-text-foreground font-semibold">{column.name}</h1>
-                    {/* actions */}
-                    <ActionsColumn
-                      newTaskName={newTaskName}
-                      addTaskToColumn={addOrUpadateTaskToColumn}
-                      column={column}
-                      setNewTaskName={setNewTaskName}
-                      newTaskDescription={newTaskDescription}
-                      setNewTaskDescription={setNewTaskDescription}
-                      newTaskTag={newTaskTag}
-                      setNewTaskTag={setNewTaskTag}
-                      newTaskImage={newTaskImage}
-                      setNewTaskImage={setNewTaskImage}
-                      deleteColumn={deleteColumn}
-                    />
-                  </div>
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="flex flex-col gap-4  p-4 rounded-lg min-h-"
-                  >
-                    {column.tasks.map((task, index) => (
-                      <TaskItem
-                        task={task}
-                        index={index}
-                        newTaskName={newTaskName}
-                        UpdateTaskToColumn={addOrUpadateTaskToColumn}
-                        column={column}
-                        setNewTaskName={setNewTaskName}
-                        newTaskDescription={newTaskDescription}
-                        setNewTaskDescription={setNewTaskDescription}
-                        newTaskTag={newTaskTag}
-                        setNewTaskTag={setNewTaskTag}
-                        deleteTaskColumn={deleteTaskColumn}
-                        newTaskImage={newTaskImage}
-                        setNewTaskImage={setNewTaskImage}
-                      />
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
+        <Droppable droppableId="columns" direction="horizontal" type="COLUMN">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="flex gap-4 flex-row w-full"
+            >
+              <div className="flex gap-4 flex-row w-fit">
+                {Object.entries(columns).map(([id, column], index) => (
+                  <Draggable key={id} draggableId={id} index={index}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="flex flex-col w-80 h-full gap-4 bg-background-foreground p-4 rounded-md"
+                      >
+                        {/* Área de arraste no topo da coluna */}
+                        <div className="flex justify-between items-center" {...provided.dragHandleProps}>
+                          <h1 className="text-text-foreground font-semibold">{column.name}</h1>
+                          {/* actions */}
+                          <ActionsColumn
+                            newTaskName={newTaskName}
+                            addTaskToColumn={addOrUpadateTaskToColumn}
+                            column={column}
+                            setNewTaskName={setNewTaskName}
+                            newTaskDescription={newTaskDescription}
+                            setNewTaskDescription={setNewTaskDescription}
+                            newTaskTag={newTaskTag}
+                            setNewTaskTag={setNewTaskTag}
+                            newTaskImage={newTaskImage}
+                            setNewTaskImage={setNewTaskImage}
+                            deleteColumn={deleteColumn}
+                          />
+                        </div>
+                        <Droppable droppableId={id} type="TASK">
+                          {(provided, snapshot) => (
+                            <div key={id}
+                            >
+                              <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                className="flex flex-col gap-4  p-4 rounded-lg min-h-"
+                              >
+                                {column.tasks.map((task, index) => (
+                                  <TaskItem
+                                    task={task}
+                                    index={index}
+                                    newTaskName={newTaskName}
+                                    UpdateTaskToColumn={addOrUpadateTaskToColumn}
+                                    column={column}
+                                    setNewTaskName={setNewTaskName}
+                                    newTaskDescription={newTaskDescription}
+                                    setNewTaskDescription={setNewTaskDescription}
+                                    newTaskTag={newTaskTag}
+                                    setNewTaskTag={setNewTaskTag}
+                                    deleteTaskColumn={deleteTaskColumn}
+                                    newTaskImage={newTaskImage}
+                                    setNewTaskImage={setNewTaskImage}
+                                  />
+                                ))}
+                                {provided.placeholder}
+                              </div>
+                            </div>
+                          )}
+                        </Droppable>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+              </div>
+
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
       </DragDropContext>
     </div>
   );
