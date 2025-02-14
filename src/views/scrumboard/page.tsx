@@ -14,6 +14,10 @@ import { createOrEdit, createOrEditColumn, deleteColumnById, deleteTask, getColu
 import { Popover } from "@/components/ui/popover";
 import { PopoverContent, PopoverTrigger } from "@radix-ui/react-popover";
 import Image from "next/image";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { taskSchema } from "@/Schemas/scrumboard";
+import { zodResolver } from "@hookform/resolvers/zod";
 // import { createOrEditTask } from "@/models/tasks"
 
 
@@ -163,9 +167,9 @@ export default function TasksPage() {
   const addOrUpadateTaskToColumn = async (
     data: {
       taskName: string;
-      taskTag: string;
-      taskDescription: string;
-      taskImage: string;
+      taskTag?: string | undefined;
+      taskDescription?: string | undefined;
+      taskImage?: string | undefined;
     },
     columnId: string,
     id?: string
@@ -176,7 +180,7 @@ export default function TasksPage() {
     const createOrEditTask: CreateOrEditTask = {
       id: id,
       name: taskName,
-      image: taskImage,
+      image: taskImage || "",
       description: taskDescription || "Descrição padrão",
       tags: taskTag ? taskTag.split(",").map((item) => item.trim()) : [],
       date: new Date(),
@@ -404,10 +408,10 @@ function TaskItem({
   newTaskName: string,
   UpdateTaskToColumn: (
     data: {
-      taskName: string,
-      taskTag: string,
-      taskDescription: string,
-      taskImage: string,
+      taskName: string;
+      taskTag?: string | undefined;
+      taskDescription?: string | undefined;
+      taskImage?: string | undefined;
     },
     columnId: string
   ) => void,
@@ -421,6 +425,9 @@ function TaskItem({
   setNewTaskImage: React.Dispatch<React.SetStateAction<string>>,
   newTaskImage: string,
 }): React.JSX.Element {
+
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
   return <Draggable key={task.id} draggableId={task.id} index={index}>
     {(provided, snapshot) => (
       <div
@@ -465,7 +472,7 @@ function TaskItem({
           </span>
           {/* action */}
           <div>
-            <Dialog>
+            <Dialog open={openDialog} onOpenChange={(e) => setOpenDialog(e)}>
               <DialogTrigger asChild>
                 <Button
                   className="rounded-full text-text-foreground w-5 h-5 p-0  hover:bg-transparent hover:border-primary/80"
@@ -493,6 +500,7 @@ function TaskItem({
                   setNewTaskTag={setNewTaskTag}
                   newTaskImage={newTaskImage}
                   setNewTaskImage={setNewTaskImage}
+                  setOpenDialog={setOpenDialog}
                 />
               </DialogContent>
             </Dialog>
@@ -527,10 +535,10 @@ function ActionsColumn({
   newTaskName: string,
   addTaskToColumn: (
     data: {
-      taskName: string,
-      taskTag: string,
-      taskDescription: string,
-      taskImage: string,
+      taskName: string;
+      taskTag?: string | undefined;
+      taskDescription?: string | undefined;
+      taskImage?: string | undefined;
     },
     columnId: string
   ) => void,
@@ -545,8 +553,10 @@ function ActionsColumn({
   newTaskImage: string,
 }) {
 
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
   return <div className="flex gap-3">
-    <Dialog>
+    <Dialog open={openDialog} onOpenChange={(e) => setOpenDialog(e)}>
       <DialogTrigger asChild>
         <Button
           className="rounded-full text-text w-5 h-5 p-0  [&_svg]:size-3 hover:bg-transparent hover:border-primary/80"
@@ -567,6 +577,7 @@ function ActionsColumn({
           setNewTaskTag={setNewTaskTag}
           newTaskImage={newTaskImage}
           setNewTaskImage={setNewTaskImage}
+          setOpenDialog={setOpenDialog}
         />
       </DialogContent>
     </Dialog>
@@ -595,20 +606,19 @@ function FormTask({
   column,
   setNewTaskName,
   newTaskDescription,
-  setNewTaskDescription,
   newTaskTag,
-  setNewTaskTag,
-  setNewTaskImage,
   newTaskImage,
+  setOpenDialog
 }: {
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>,
   id?: string,
   newTaskName: string,
   addOrUpdateTaskToColumn: (
     data: {
-      taskName: string,
-      taskTag: string,
-      taskDescription: string,
-      taskImage: string,
+      taskName: string;
+      taskTag?: string | undefined;
+      taskDescription?: string | undefined;
+      taskImage?: string | undefined;
     },
     columnId: string,
     id?: string
@@ -622,61 +632,94 @@ function FormTask({
   setNewTaskImage: React.Dispatch<React.SetStateAction<string>>,
   newTaskImage: string,
 }) {
-  return <form
-    onSubmit={(e) => {
-      e.preventDefault();
 
-      if (newTaskName.trim()) {
-        if (id) {
-          addOrUpdateTaskToColumn({ taskName: newTaskName, taskDescription: newTaskDescription, taskTag: newTaskTag, taskImage: newTaskImage }, column.id, id);
-        } else {
-          addOrUpdateTaskToColumn({ taskName: newTaskName, taskDescription: newTaskDescription, taskTag: newTaskTag, taskImage: newTaskImage }, column.id);
-        }
-        setNewTaskName(""); // Limpa o campo após adicionar a tarefa
-      }
-    }}
-  >
+  useEffect(() => {
+    if (id) {
+      setValue("taskName", newTaskName)
+      setValue("taskTag", newTaskTag)
+      setValue("taskDescription", newTaskDescription)
+      setValue("taskImage", newTaskImage)
+    }
+  }, [id])
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue
+  } = useForm<z.infer<typeof taskSchema>>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      taskName: "",
+      taskTag: "",
+      taskDescription: "",
+      taskImage: "",
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof taskSchema>) => {
+
+    if (id) {
+      addOrUpdateTaskToColumn(data, column.id, id);
+    } else {
+      addOrUpdateTaskToColumn(data, column.id);
+    }
+    reset(); // Limpa o formulário após o envio
+    setOpenDialog(false);
+  };
+
+  return <form onSubmit={handleSubmit(onSubmit)}>
     <Card className="w-full text-text border-0">
       <CardHeader>
         <CardTitle>Create task</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid w-full items-center gap-4">
+          {/* Campo de Nome */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               placeholder="Name of your task"
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)} />
+              {...register("taskName")}
+            />
+            {errors.taskName && (
+              <p className="text-red-500 text-sm">{errors.taskName.message}</p>
+            )}
           </div>
+
+          {/* Campo de Tags */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="tag">Tags</Label>
             <Input
               id="tag"
               placeholder="Tags of your task"
-              value={newTaskTag}
-              onChange={(e) => {
-                setNewTaskTag(e.target.value)
-              }} />
+              {...register("taskTag")}
+            />
           </div>
+
+          {/* Campo de Imagem */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="image">Image (url)</Label>
             <Input
               id="image"
               placeholder="Image url of your task"
-              value={newTaskImage}
-              onChange={(e) => {
-                setNewTaskImage(e.target.value)
-              }} />
+              {...register("taskImage")}
+            />
+            {errors.taskImage && (
+              <p className="text-red-500 text-sm">{errors.taskImage.message}</p>
+            )}
           </div>
+
+          {/* Campo de Descrição */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               placeholder="Description of your task"
-              value={newTaskDescription}
-              onChange={(e) => setNewTaskDescription(e.target.value)} />
+              {...register("taskDescription")}
+            />
           </div>
         </div>
       </CardContent>
@@ -684,14 +727,7 @@ function FormTask({
         <DialogClose asChild>
           <Button variant="outline">Cancel</Button>
         </DialogClose>
-
-        <DialogClose asChild>
-          <Button
-            type="submit"
-          >
-            {id ? "Edit" : "Add"}
-          </Button>
-        </DialogClose>
+        <Button type="submit" >{id ? "Edit" : "Add"}</Button>
       </CardFooter>
     </Card>
   </form>;
