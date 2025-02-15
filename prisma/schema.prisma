@@ -14,26 +14,30 @@ datasource db {
 }
 
 model Task {
-  id          String   @id @default(cuid())
-  name        String
-  description String
-  tags        String[] @default([])
-  image       String?
-  date        DateTime @default(now())
-  column_id   String
-  column      Column   @relation("ColumnTask", fields: [column_id], references: [id])
-  index       Int
+  id             String   @id @default(cuid())
+  name           String
+  description    String
+  tags           String[] @default([])
+  image          String?
+  date           DateTime @default(now())
+  column_id      String
+  column         Column   @relation("ColumnTask", fields: [column_id], references: [id])
+  index          Int
+  user_create_id String
+  user           User     @relation("User", fields: [user_create_id], references: [id])
 }
 
 model Column {
-  id    String @id @default(cuid())
-  name  String
-  tasks Task[] @relation("ColumnTask")
-  index Int
+  id             String @id @default(cuid())
+  name           String
+  tasks          Task[] @relation("ColumnTask")
+  index          Int
+  user_create_id String
+  user           User   @relation("User", fields: [user_create_id], references: [id])
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
+  id             String    @id @default(cuid())
   name           String
   avatar         String?
   email          String    @unique
@@ -48,4 +52,6 @@ model User {
   created        DateTime  @default(now())
   updated        DateTime? @updatedAt
   active         Boolean   @default(false)
+  tasks          Task[]    @relation("User")
+  columns        Column[]  @relation("User")
 }

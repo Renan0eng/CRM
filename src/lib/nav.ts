@@ -30,7 +30,7 @@ export const data = {
     },
     {
       title: "Lotes",
-      url: "/lotes",
+      url: "/admin/lotes",
       icon: ListOrdered,
       // items: [
       //   {

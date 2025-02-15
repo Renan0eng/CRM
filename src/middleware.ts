@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "./lib/auth";
+import { getUserId, verifyToken } from "./lib/auth";
 
 export async function middleware(request: NextRequest) {
   const url = new URL(request.url);

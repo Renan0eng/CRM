@@ -140,6 +140,7 @@ type CreateOrEditTask = {
   date: Date;
   column_id: string;
   index: number;
+  user_create_id: string;
 };
 
 type Column = {

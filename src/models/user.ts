@@ -17,7 +17,7 @@ export async function signIn({
     const response = await getUserByEmailPassword(email, password);
     if (response?.token) {
       const cookieStore = await cookies();
-      const token = cookieStore.set("token", response.token);
+      cookieStore.set("token", response.token);
       return response;
     }
     return response;
@@ -39,7 +39,7 @@ export async function getUserByEmailPassword(
 
   if (!response) return { message: "Credenciais Inválidas" };
 
-  if (response.active) return { message: "Usuario não ativado!" };
+  if (!response.active) return { message: "Usuario não ativado!" };
 
   const passwordMatch = await bcrypt.compare(formPassword, response.password);
 

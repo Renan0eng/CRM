@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
 import { jwtVerify, SignJWT } from "jose";
+import { cookies } from "next/headers";
 
 export async function createSession(user: User, secret: string) {
   // Codifica a chave secreta para uso no JWT
@@ -15,9 +16,7 @@ export async function createSession(user: User, secret: string) {
   return token;
 }
 
-export async function verifyToken(token: string | undefined) {
-  if (!token) return null;
-
+export async function verifyToken(token: string) {
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
@@ -26,4 +25,18 @@ export async function verifyToken(token: string | undefined) {
     console.error("JWT validation failed:", error);
     return null;
   }
+}
+
+export async function getUserId() {
+  const cookieStore = cookies();
+  const token = cookieStore.get("token");
+
+  if (!token?.value) return false;
+
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const { payload } = await jwtVerify(token.value, secret);
+
+  console.log("payload: ", payload);
+
+  return payload.userId as string;
 }

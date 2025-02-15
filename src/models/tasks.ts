@@ -1,6 +1,8 @@
 "use server";
 
+import { getUserId } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { error } from "console";
 
 export async function createOrEdit(data: CreateOrEditTask) {
   console.log("data", data);
@@ -14,15 +16,29 @@ export async function createOrEdit(data: CreateOrEditTask) {
     });
     return task;
   } else {
+    const user_create_id = await getUserId();
+
+    if (!user_create_id) return { message: "error ao buscar usuario" };
+
     const task = await prisma.task.create({
-      data,
+      data: {
+        ...data,
+        user_create_id,
+      },
     });
     return task;
   }
 }
 
 export async function getColumns() {
+  const user_id = await getUserId();
+
+  if (!user_id) return { message: "error ao buscar usuario" };
+
   const columns = await prisma.column.findMany({
+    where: {
+      user_create_id: user_id,
+    },
     orderBy: {
       index: "asc",
     },
@@ -63,9 +79,15 @@ export async function createOrEditColumn(data: {
       index: "desc",
     },
   });
+
+  const user_create_id = await getUserId();
+
+  if (!user_create_id) return { message: "error ao buscar usuario" };
+
   const column = await prisma.column.create({
     data: {
       ...data,
+      user_create_id,
       index: lastColumn ? lastColumn?.index + 1 : 0,
     },
     include: {
