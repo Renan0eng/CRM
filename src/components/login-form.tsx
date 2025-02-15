@@ -13,24 +13,26 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { loginSchema, LoginSchema } from "@/Schemas/login"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { signIn } from "@/models/user"
+import { useParams } from 'next/navigation'
 
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function LoginForm() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
-  const searchParams = useSearchParams();
+  const [redirect, setRedirect] = useState<string | null>(null);
 
-  const redirect = searchParams.get("redirect");
 
-  // Configuração do React Hook Form com Zod
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const redirect = queryParams.get('redirect');
+    setRedirect(redirect)
+  }, [router]);
+
   const {
     register,
     handleSubmit,
@@ -39,7 +41,6 @@ export function LoginForm({
     resolver: zodResolver(loginSchema),
   })
 
-  // Função para lidar com o envio do formulário
   const onSubmit = async (data: LoginSchema) => {
     try {
 
@@ -49,6 +50,7 @@ export function LoginForm({
         if (response.message) {
           setError(response.message)
         }
+
         window.localStorage.setItem("User", JSON.stringify(response.user));
 
         router.push(redirect || "/admin")
@@ -61,7 +63,7 @@ export function LoginForm({
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl text-text">Login</CardTitle>

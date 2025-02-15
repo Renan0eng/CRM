@@ -1,4 +1,4 @@
-import { Wrench } from "lucide-react";
+import { ListOrdered, Wrench } from "lucide-react";
 
 export const data = {
   user: {
@@ -8,45 +8,45 @@ export const data = {
   },
   navMain: [
     {
-      title: "Tools",
+      title: "Ferramentas",
       url: "#",
       icon: Wrench,
       isActive: false,
       items: [
         // {
         //   title: "WhatsApp",
-        //   url: "/tools/whatsapp",
+        //   url: "/ferramentas/whatsapp",
         //   icon: SquareTerminal,
         // },
         // {
         //   title: "Calendario",
-        //   url: "/tools/calendar",
+        //   url: "/ferramentas/calendar",
         // },
         {
           title: "Scrumboard",
-          url: "admin/tools/scrumboard",
+          url: "admin/ferramentas/scrumboard",
         },
       ],
     },
-    // {
-    //   title: "Models",
-    //   url: "#",
-    //   icon: Bot,
-    //   items: [
-    //     {
-    //       title: "Genesis",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Explorer",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Quantum",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
+    {
+      title: "Lotes",
+      url: "/lotes",
+      icon: ListOrdered,
+      // items: [
+      //   {
+      //     title: "Genesis",
+      //     url: "#",
+      //   },
+      //   {
+      //     title: "Explorer",
+      //     url: "#",
+      //   },
+      //   {
+      //     title: "Quantum",
+      //     url: "#",
+      //   },
+      // ],
+    },
     // {
     //   title: "Documentation",
     //   url: "#",
