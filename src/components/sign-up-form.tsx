@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { signUpSchema, SignUpSchema } from "@/Schemas/login"
 import { useRouter } from "next/navigation"
+import { createUser } from "@/models/user"
 
 
 export function SignUpForm({
@@ -35,10 +36,12 @@ export function SignUpForm({
   // Função para lidar com o envio do formulário
   const onSubmit = async (data: SignUpSchema) => {
     try {
+      const { confirmPassword, ...user } = data;
 
+      const response = await createUser(user);
 
-      if (true) {
-        router.push("/admin")
+      if (response) {
+        router.push("/auth/login")
       } else {
         alert("An error occurred during sign up.")
       }

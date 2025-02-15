@@ -15,7 +15,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { loginSchema, LoginSchema } from "@/Schemas/login"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "@/models/user"
 
 
 export function LoginForm({
@@ -24,6 +25,10 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+
+  const searchParams = useSearchParams();
+
+  const redirect = searchParams.get("redirect");
 
   // Configuração do React Hook Form com Zod
   const {
@@ -38,9 +43,15 @@ export function LoginForm({
   const onSubmit = async (data: LoginSchema) => {
     try {
 
+      const response = await signIn(data);
 
-      if (true) {
-        router.push("/admin")
+      if (response) {
+        if (response.message) {
+          setError(response.message)
+        }
+        window.localStorage.setItem("User", JSON.stringify(response.user));
+
+        router.push(redirect || "/admin")
       } else {
         setError("Invalid credentials")
       }

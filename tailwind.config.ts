@@ -152,7 +152,11 @@ const config: Config = {
           foreground: "hsl(0, 0%, 65%)",
         },
         border: "hsl(var(--border))",
-        input: "hsl(0, 0%, 21%)",
+        input: {
+          DEFAULT: "hsl(0, 0%, 21%)",
+          background: "hsl(0, 0%, 100%, 8%)",
+          border: "hsl(0, 0%, 100%, 24%)",
+        },
         ring: "hsl(var(--ring))",
         chart: {
           "1": "hsl(var(--chart-1))",

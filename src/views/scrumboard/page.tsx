@@ -790,6 +790,6 @@ function AddNewCalumnBtn({
           </CardFooter>
         </Card>
       </DialogContent>
-    </Dialog>
-  </div>;
+    </Dialog >
+  </div >;
 }
