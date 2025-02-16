@@ -37,19 +37,15 @@ export default function TasksPage() {
   }, [])
 
   const getData = async () => {
-    const data = await getColumns();
+    const data = await getColumns() as Column[] | { message: string }
 
-    console.log("data", data);
-
-    if (data) {
-
+    if ("message" in data) {
+      console.error("Message:", data.message);
+    } else {
       const formattedData: Columns = data.reduce((acc, column) => {
         acc[column.id] = column;
         return acc;
       }, {} as Columns);
-
-
-      console.log("formatedData", formattedData);
 
       setColumns(formattedData)
     }
@@ -157,6 +153,10 @@ export default function TasksPage() {
       name: columnId,
     });
 
+    if (!newColumn) {
+      return
+    }
+
     setColumns((prevColumns) => ({
       ...prevColumns,
       [newColumn.id]: newColumn,
@@ -188,14 +188,11 @@ export default function TasksPage() {
       index: 1
     };
 
-    console.log("createOrEditTask", createOrEditTask);
+    const newTask = await createOrEdit(createOrEditTask)
 
-    const newTask = await createOrEdit(createOrEditTask);
-
-    console.log("newTask", newTask);
-
-
-    if (newTask) {
+    if ("message" in newTask) {
+      console.log("Message:", data);
+    } else {
 
       setNewTaskName("")
       setNewTaskTag("")
@@ -213,9 +210,6 @@ export default function TasksPage() {
               ...updatedTasks[taskIndex],
               ...newTask,
             };
-            console.log(
-              `Tarefa "${updatedTasks[taskIndex].name}" editada na coluna "${column.name}"! ${JSON.stringify(updatedTasks[taskIndex])}`
-            );
 
             return {
               ...prevColumns,
@@ -234,13 +228,9 @@ export default function TasksPage() {
             };
           }
         });
-        console.log("Columns", columns);
       } else {
         console.error(`Coluna "${columnId}" não encontrada!`);
       }
-    } else {
-      console.error(`Erro ao criar task! ${newTask}`);
-
     }
   };
 

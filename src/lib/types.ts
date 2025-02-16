@@ -129,6 +129,7 @@ type Task = {
   date: Date;
   column_id: string;
   index: number;
+  user_create_id: string;
 };
 
 type CreateOrEditTask = {
@@ -140,7 +141,7 @@ type CreateOrEditTask = {
   date: Date;
   column_id: string;
   index: number;
-  user_create_id: string;
+  user_create_id?: string;
 };
 
 type Column = {
@@ -148,6 +149,7 @@ type Column = {
   name: string;
   tasks: Task[];
   index: number;
+  user_create_id: string;
 };
 
 type Columns = {

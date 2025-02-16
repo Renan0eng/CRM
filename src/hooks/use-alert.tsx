@@ -10,6 +10,11 @@ interface AlertContextType {
   setTime: (visible: number) => void;
   type: "success" | "error" | "info" | "warning" | null | undefined;
   setType: (message: "success" | "error" | "info" | "warning" | null | undefined) => void;
+  setAlert: (
+    alertMessage: string,
+    alertType?: "success" | "error" | "info" | "warning" | null | undefined,
+    alertTime?: number
+  ) => void;
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
@@ -20,8 +25,20 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
   const [time, setTime] = useState<number>(0);
   const [type, setType] = useState<"success" | "error" | "info" | "warning" | null | undefined>("info");
 
+  const setAlert = (
+    alertMessage: string,
+    alertType: "success" | "error" | "info" | "warning" | null | undefined = "success",
+    alertTime: number = 5000
+  ) => {
+    // Atualiza os estados com os valores fornecidos ou os padrões
+    setType(alertType);
+    setTime(alertTime);
+    setVisible(true);
+    setMessage(alertMessage);
+  };
+
   return (
-    <AlertContext.Provider value={{ message, setMessage, visible, setVisible, time, setTime, type, setType }}>
+    <AlertContext.Provider value={{ message, setMessage, visible, setVisible, time, setTime, type, setType, setAlert }}>
       {children}
     </AlertContext.Provider>
   );

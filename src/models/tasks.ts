@@ -18,7 +18,7 @@ export async function createOrEdit(data: CreateOrEditTask) {
   } else {
     const user_create_id = await getUserId();
 
-    if (!user_create_id) return { message: "error ao buscar usuario" };
+    if (user_create_id === false) return { message: "error ao buscar usuario" };
 
     const task = await prisma.task.create({
       data: {
@@ -33,7 +33,7 @@ export async function createOrEdit(data: CreateOrEditTask) {
 export async function getColumns() {
   const user_id = await getUserId();
 
-  if (!user_id) return { message: "error ao buscar usuario" };
+  if (user_id === false) return { message: "error ao buscar usuario" };
 
   const columns = await prisma.column.findMany({
     where: {
@@ -82,7 +82,7 @@ export async function createOrEditColumn(data: {
 
   const user_create_id = await getUserId();
 
-  if (!user_create_id) return { message: "error ao buscar usuario" };
+  if (!user_create_id) return false;
 
   const column = await prisma.column.create({
     data: {

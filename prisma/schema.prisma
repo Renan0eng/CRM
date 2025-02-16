@@ -25,6 +25,10 @@ model Task {
   index          Int
   user_create_id String
   user           User     @relation("User", fields: [user_create_id], references: [id])
+
+  @@index([id])
+  @@index([column_id])
+  @@index([user_create_id])
 }
 
 model Column {
@@ -34,6 +38,9 @@ model Column {
   index          Int
   user_create_id String
   user           User   @relation("User", fields: [user_create_id], references: [id])
+
+  @@index([id])
+  @@index([user_create_id])
 }
 
 model User {
@@ -54,4 +61,167 @@ model User {
   active         Boolean   @default(false)
   tasks          Task[]    @relation("User")
   columns        Column[]  @relation("User")
+
+  @@index([id])
+  @@index([user_id_create])
+  @@index([user_id_update])
+  @@index([user_id_delete])
+}
+
+model Lote {
+  id              String            @id @default(cuid())
+  nome            String
+  descricao       String?
+  estagio         String            @default("cria") //cria, recria, engorda e abate
+  qtd             Int?
+  kg              Float?
+  id_father       Int?
+  created         DateTime          @default(now())
+  user_created_id String
+  updated         DateTime          @default(now()) @updatedAt
+  user_updated_id String?
+  deleted         Boolean           @default(false)
+  user_deleted_id String?
+  close           DateTime?
+  user_close_id   Int?
+  entrada         DateTime          @default(now())
+  Biometrias      Biometria[]
+  tanques         Tanque[]
+  ProdutoMoviment ProductMovement[]
+  mortalidade     Mortalidade[]
+
+  @@index([id])
+  @@index([user_created_id])
+  @@index([user_updated_id])
+  @@index([user_deleted_id])
+}
+
+model Tanque {
+  id              String        @id @default(cuid())
+  id_lote         String
+  name            String
+  description     String?
+  kg              Float
+  qtd             Float
+  created         DateTime      @default(now())
+  user_created_id String
+  updated         DateTime      @default(now()) @updatedAt
+  user_updated_id String?
+  deleted         Boolean       @default(false)
+  user_deleted_id String?
+  Lote            Lote          @relation(fields: [id_lote], references: [id])
+  biometrias      Biometria[]
+  mortalidades    Mortalidade[]
+
+  @@index([id_lote])
+  @@index([id])
+  @@index([user_created_id])
+  @@index([user_updated_id])
+  @@index([user_deleted_id])
+}
+
+model Mortalidade {
+  id              String   @id @default(cuid())
+  id_lote         String?
+  id_tanque       String?
+  description     String?
+  qtd             Float
+  created         DateTime @default(now())
+  user_created_id String
+  updated         DateTime @default(now()) @updatedAt
+  user_updated_id String?
+  deleted         Boolean  @default(false)
+  user_deleted_id String?
+  Lote            Lote?    @relation(fields: [id_lote], references: [id])
+  Tanque          Tanque?  @relation(fields: [id_tanque], references: [id])
+
+  @@index([id])
+  @@index([id_lote])
+  @@index([id_tanque])
+  @@index([user_created_id])
+  @@index([user_updated_id])
+  @@index([user_deleted_id])
+}
+
+model Biometria {
+  id              String   @id @default(cuid())
+  id_tanque       String?
+  id_lote         String?
+  description     String?
+  kg              Float?
+  qtd             Float?
+  bio             Float
+  data_bio        DateTime @default(now())
+  created         DateTime @default(now())
+  user_created_id String
+  updated         DateTime @default(now()) @updatedAt
+  user_updated_id String?
+  deleted         Boolean  @default(false)
+  user_deleted_id String?
+  Tanque          Tanque?  @relation(fields: [id_tanque], references: [id])
+  Lotes           Lote?    @relation(fields: [id_lote], references: [id])
+
+  @@index([id])
+  @@index([id_lote])
+  @@index([id_tanque])
+  @@index([user_created_id])
+  @@index([user_updated_id])
+  @@index([user_deleted_id])
+}
+
+model Product {
+  id              String            @id @default(cuid())
+  name            String
+  description     String?
+  price           Float?
+  cost            Float?
+  image_url       String?           @default("https://i.imgur.com/6VBx3io.png")
+  type_med        String            @default("unidade")
+  visible         Boolean           @default(true)
+  tag             Product_tag[]
+  created         DateTime          @default(now())
+  user_created_id String
+  updated         DateTime          @default(now()) @updatedAt
+  user_updated_id String?
+  deleted         Boolean           @default(false)
+  user_deleted_id String?
+  movements       ProductMovement[]
+
+  @@index([id])
+  @@index([user_created_id])
+  @@index([user_updated_id])
+  @@index([user_deleted_id])
+}
+
+model Product_tag {
+  id      String    @id @default(cuid())
+  name    String    @unique
+  Product Product[]
+}
+
+model ProductMovement {
+  id              String    @id @default(cuid())
+  type            String
+  quantity        Float
+  productId       String
+  id_lote         String
+  product_name    String?
+  description     String?
+  data_moviment   DateTime  @default(now())
+  created         DateTime  @default(now())
+  user_created_id String
+  updated         DateTime  @default(now()) @updatedAt
+  user_updated_id String?
+  deleted         Boolean   @default(false)
+  user_deleted_id String?
+  closed          DateTime?
+  Product         Product   @relation(fields: [productId], references: [id])
+  Lote            Lote?     @relation(fields: [id_lote], references: [id])
+
+  @@index([id])
+  @@index([id_lote])
+  @@index([productId])
+  @@index([user_created_id])
+  @@index([user_updated_id])
+  @@index([user_deleted_id])
 }

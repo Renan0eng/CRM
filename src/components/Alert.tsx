@@ -41,8 +41,8 @@ export function GlobalAlert() {
   return (
     <Alert className={alertVariants({ type })}> {/* Aplica a variante do tipo */}
       <Terminal className="h-4 w-4" />
-      <AlertTitle>Heads up!</AlertTitle>
-      <AlertDescription>{message}</AlertDescription>
+      <AlertTitle className="font-bold text-neutral-800">Atenção !!</AlertTitle>
+      <AlertDescription className="font-bold text-neutral-800">{message}</AlertDescription>
       <button
         onClick={() => setVisible(false)} // Função para esconder o alerta
         className="absolute top-0 right-0 p-2 text-xl text-gray-700 hover:text-gray-900"

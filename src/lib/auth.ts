@@ -36,7 +36,5 @@ export async function getUserId() {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
   const { payload } = await jwtVerify(token.value, secret);
 
-  console.log("payload: ", payload);
-
   return payload.userId as string;
 }

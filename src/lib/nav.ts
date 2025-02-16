@@ -24,7 +24,7 @@ export const data = {
         // },
         {
           title: "Scrumboard",
-          url: "admin/ferramentas/scrumboard",
+          url: "/admin/ferramentas/scrumboard",
         },
       ],
     },
@@ -32,20 +32,20 @@ export const data = {
       title: "Lotes",
       url: "/admin/lotes",
       icon: ListOrdered,
-      // items: [
-      //   {
-      //     title: "Genesis",
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Explorer",
-      //     url: "#",
-      //   },
-      //   {
-      //     title: "Quantum",
-      //     url: "#",
-      //   },
-      // ],
+      items: [
+        {
+          title: "Cadastro",
+          url: "/admin/lotes/cadastro",
+        },
+        //   {
+        //     title: "Explorer",
+        //     url: "#",
+        //   },
+        //   {
+        //     title: "Quantum",
+        //     url: "#",
+        //   },
+      ],
     },
     // {
     //   title: "Documentation",
