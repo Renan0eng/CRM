@@ -2,13 +2,13 @@
 
 import { getUserId } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { Lote, Prisma } from "@prisma/client";
+import { Prisma, Tanque } from "@prisma/client";
 
-type CreateLote = Omit<Prisma.LoteCreateInput, "user_created_id"> &
-  Partial<Pick<Prisma.LoteCreateInput, "id">>;
+type CreateTanque = Omit<Prisma.TanqueCreateInput, "user_created_id"> &
+  Partial<Pick<Prisma.TanqueCreateInput, "id">>;
 
-export async function createLoteOrUpdate(
-  data: CreateLote
+export async function createTanqueOrUpdate(
+  data: CreateTanque
 ): Promise<{ message: string; status: boolean }> {
   const user_created_id = await getUserId();
 
@@ -16,7 +16,7 @@ export async function createLoteOrUpdate(
     return { message: "Error ao validar usuario", status: false };
 
   if (data.id) {
-    const lote = await prisma.lote.update({
+    const tanque = await prisma.tanque.update({
       where: {
         id: data.id,
       },
@@ -25,27 +25,26 @@ export async function createLoteOrUpdate(
         user_created_id,
       },
     });
-    if (lote) {
-      return { message: "Lote Editado Com Sucesso", status: true };
+    if (tanque) {
+      return { message: "Tanque Editado Com Sucesso", status: true };
     }
-    return { message: "Erro ao criar lote", status: false };
+    return { message: "Erro ao criar tanque", status: false };
   } else {
-    const lote = await prisma.lote.create({
+    const tanque = await prisma.tanque.create({
       data: {
         ...data,
         user_created_id,
       },
     });
-    if (lote) {
-      return { message: "Lote Cadastrado Com Sucesso", status: true };
+    if (tanque) {
+      return { message: "Tanque Cadastrado Com Sucesso", status: true };
     }
 
-    return { message: "Erro ao criar lote", status: false };
+    return { message: "Erro ao criar tanque", status: false };
   }
-  return { message: "Erro ao criar lote", status: false };
 }
 
-export async function getlotes(
+export async function getTanques(
   take: number = 10,
   page: number = 0,
   filter?: string, // Filtro opcional (ex.: email, nome, etc.)
@@ -55,7 +54,7 @@ export async function getlotes(
   message: string;
   status: boolean;
   data?: {
-    lotes: Lote[];
+    tanques: Tanque[];
     pages: number;
     qtd: number;
   };
@@ -67,7 +66,7 @@ export async function getlotes(
 
   try {
     // Busca os dados paginados
-    const lote = await prisma.lote.findMany({
+    const tanque = await prisma.tanque.findMany({
       where: {
         user_created_id: user_id,
         ...(filter && {
@@ -83,7 +82,7 @@ export async function getlotes(
     });
 
     // Conta o total de registros para calcular as páginas
-    const totalRecords = await prisma.lote.count({
+    const totalRecords = await prisma.tanque.count({
       where: {
         user_created_id: user_id,
         ...(filter && {
@@ -95,27 +94,27 @@ export async function getlotes(
       },
     });
 
-    if (lote) {
+    if (tanque) {
       return {
-        message: "Lotes encontrados",
+        message: "Tanques encontrados",
         status: true,
         data: {
-          lotes: lote,
+          tanques: tanque,
           pages: Math.ceil(totalRecords / take), // Calcula o número de páginas
           qtd: totalRecords, // Total de registros
         },
       };
     }
   } catch (error) {
-    console.error("Erro ao buscar lotes:", error);
-    return { message: "Erro ao buscar lotes", status: false };
+    console.error("Erro ao buscar tanques:", error);
+    return { message: "Erro ao buscar tanques", status: false };
   }
 
-  return { message: "Lotes não encontrados", status: false };
+  return { message: "Tanques não encontrados", status: false };
 }
 
-export async function getLoteByid(id: string): Promise<Lote | null> {
-  const lote = await prisma.lote.findFirst({
+export async function getTanqueByid(id: string): Promise<Tanque | null> {
+  const lote = await prisma.tanque.findFirst({
     where: {
       id,
     },
@@ -124,12 +123,12 @@ export async function getLoteByid(id: string): Promise<Lote | null> {
   return lote;
 }
 
-export async function deleteLoteByIds(ids: string[]): Promise<{
+export async function deleteTanqueByIds(ids: string[]): Promise<{
   message: string;
   status: boolean;
 }> {
   try {
-    const lote = await prisma.lote.deleteMany({
+    const lote = await prisma.tanque.deleteMany({
       where: {
         id: {
           in: ids, // Exclui todos os lotes cujo ID está no array `ids`

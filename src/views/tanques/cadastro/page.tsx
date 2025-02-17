@@ -1,5 +1,6 @@
 "use client"
 import { LoteDataTable } from "@/components/tables/lotesTable/table";
+import { TanqueDataTable } from "@/components/tables/tanques/table";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -8,9 +9,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAlert } from "@/hooks/use-alert";
 import { cn } from "@/lib/utils";
-import { createLoteOrUpdate, getLoteByid } from "@/models/lote";
-import { CadastroLoteSchema, cadastroLoteSchema } from "@/Schemas/Lote";
+import { getlotes } from "@/models/lote";
+import { createTanqueOrUpdate, getTanqueByid } from "@/models/tanque";
+import { CadastroTanqueSchema, cadastroTanqueSchema } from "@/Schemas/tanque";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Lote } from "@prisma/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon, Save, Undo2 } from "lucide-react";
@@ -18,25 +21,28 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-export default function CadastroLoteOrEdit({
-  idLote
+export default function CadastroTanqueOrEdit({
+  idTanque
 }: {
-  idLote?: string
+  idTanque?: string
 }) {
 
   const router = useRouter();
   const [error, setError] = useState<string | null>(null)
 
+  const [lotes, setLotes] = useState<Lote[]>();
+
   const alert = useAlert();
 
-  const getData = async (idLote: string) => {
+  const getDataTanque = async (idTanque: string) => {
 
-    const lote = await getLoteByid(idLote);
+    const lote = await getTanqueByid(idTanque);
 
     if (lote) {
       setValue("nome", lote.nome);
-      setValue("estagio", lote.estagio);
-      setValue("entrada", lote.entrada);
+      setValue("id_lote", lote.id_lote);
+      setId_lote(lote.id_lote);
+      setValue("area", lote.area);
       setValue("descricao", lote.descricao || "");
       setValue("kg", lote.kg || 0);
       setValue("qtd", lote.qtd || 0);
@@ -48,11 +54,28 @@ export default function CadastroLoteOrEdit({
 
   useEffect(() => {
 
-    if (idLote) {
-      getData(idLote)
+    if (idTanque) {
+      getDataTanque(idTanque)
     }
 
-  }, [idLote])
+  }, [idTanque])
+
+  const getData = async () => {
+    const lotes = await getlotes(99999);
+
+    if (!lotes.status) {
+      alert.setAlert(lotes.message, lotes.status ? "success" : "error");
+    }
+    if (lotes.data) {
+      setLotes(lotes.data.lotes || []);
+    }
+  }
+
+  useEffect(() => {
+
+    getData()
+
+  }, [])
 
   const {
     register,
@@ -61,31 +84,37 @@ export default function CadastroLoteOrEdit({
     reset,
     watch,
     formState: { errors },
-  } = useForm<CadastroLoteSchema>({
-    resolver: zodResolver(cadastroLoteSchema),
+  } = useForm<CadastroTanqueSchema>({
+    resolver: zodResolver(cadastroTanqueSchema),
     defaultValues: {
-      entrada: new Date(),
-      estagio: 'cria',
       kg: 0,
-      qtd: 0
+      qtd: 0,
+      area: 0,
+      id_lote: ""
     }
   })
 
-  const onSubmit = async (data: CadastroLoteSchema) => {
+  const [id_lote, setId_lote] = useState<string>();
+
+  const onSubmit = async (data: CadastroTanqueSchema) => {
     console.log(data);
 
     try {
 
-      const response = await createLoteOrUpdate({
-        ...data,
-        id: idLote,
+      const { id_lote, ...send } = data
+
+      const response = await createTanqueOrUpdate({
+        ...send,
+        id: idTanque,
+        Lote: { connect: { id: data.id_lote } },
+        area: typeof data.area === "number" ? data.area : 0,
         kg: typeof data.kg === "number" ? data.kg : 0,
         qtd: typeof data.qtd === "number" ? data.qtd : 0,
       })
 
       if (response) {
         if (response.status) {
-          if (idLote) {
+          if (idTanque) {
             router.back();
           } else {
             reset();
@@ -110,7 +139,7 @@ export default function CadastroLoteOrEdit({
   return (
     <div className="w-full text-text flex p-4 flex-col gap-4 scrollable overflow-scroll h-full">
       <div className="flex w-full justify-between">
-        <span className="text-4xl font-bold" > Lotes</span>
+        <span className="text-4xl font-bold" >{idTanque ? "Edição" : "Casdastro"} de Tanque</span>
         <div className="flex gap-4 font-bold">
           <Button variant="outline" className="w-full"
             onClick={(e) => {
@@ -201,51 +230,48 @@ export default function CadastroLoteOrEdit({
             </div>
             <div className=" flex flex-col w-full gap-8 md:flex-row">
               <div className="w-full gap-2">
-                <Label className="text-text-foreground font-semibold text-md" htmlFor="estagio">Estagio</Label>
-                <Select value={watch("estagio")} onValueChange={(e: any) => setValue("estagio", e)}>
+                <Label className="text-text-foreground font-semibold text-md" htmlFor="id_lote">Lote</Label>
+                {lotes?.length ? <Select value={id_lote} onValueChange={(e: any) => {
+                  setValue("id_lote", e)
+                  setId_lote(e)
+                }}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a fruit" />
+                    <SelectValue placeholder="Selecionar Lote" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Estagios</SelectLabel>
-                      <SelectItem value="cria">Cria</SelectItem>
-                      <SelectItem value="recria">Recria</SelectItem>
-                      <SelectItem value="engorda">Engorda</SelectItem>
-                      <SelectItem value="abate">Abate</SelectItem>
+                      <SelectLabel>Lotes</SelectLabel>
+                      {lotes?.length && lotes.map((lote) => <SelectItem value={lote.id} >{lote.nome}</SelectItem>)}
                     </SelectGroup>
                   </SelectContent>
-                </Select>
-                {errors.estagio && (
-                  <p className="text-sm text-red-500">{errors.estagio.message}</p>
+                </Select> : <Select disabled>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecionar Lote" />
+                  </SelectTrigger>
+                </Select>}
+                {errors.id_lote && (
+                  <p className="text-sm text-red-500">{errors.id_lote.message}</p>
                 )}
               </div>
               <div className="w-full gap-2">
-                <Label className="text-text-foreground font-semibold text-md" htmlFor="entrada">Data Entrada</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal border-input-border bg-input-background",
-                        !watch("entrada") && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon />
-                      {watch("entrada") ? format(watch("entrada"), "PPP", { locale: ptBR }) : <span>Data Entrada</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={watch("entrada")}
-                      onSelect={(e) => setValue("entrada", e || new Date())}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                {errors.entrada && (
-                  <p className="text-sm text-red-500">{errors.entrada.message}</p>
+                <Label className="text-text-foreground font-semibold text-md" htmlFor="area">
+                  Área
+                </Label>
+                <Input
+                  id="area"
+                  value={watch("area") === 0 ? "" : watch("area")}
+                  type="number"
+                  placeholder="ex. 12,345"
+                  className="appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(",", ".");
+                    const parsedValue = parseFloat(rawValue);
+                    const fixedValue = parseFloat(parsedValue.toFixed(4))
+                    setValue("area", isNaN(fixedValue) ? 0 : fixedValue);
+                  }}
+                />
+                {errors.area && (
+                  <p className="text-sm text-red-500">{errors.area.message}</p>
                 )}
               </div>
             </div>
@@ -253,14 +279,14 @@ export default function CadastroLoteOrEdit({
               <div className="flex flex-col md:flex-row w-full md:w-[25%] gap-8 p-0 md:pl-4">
                 <Button type="submit" className="w-full">
                   <Save />
-                  {idLote ? "Editar" : "Cadastrar"}
+                  {idTanque ? "Editar" : "Cadastrar"}
                 </Button>
               </div>
             </div>
           </div>
         </form>
       </div>
-      <LoteDataTable />
+      <TanqueDataTable />
     </div >
   )
 }

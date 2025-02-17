@@ -1,5 +1,5 @@
-import CadastroLoteOrEdit from "@/views/lotes/cadastro/page";
+import CadastroTanqueOrEdit from "@/views/tanques/cadastro/page";
 
 export default function Page() {
-  return (<CadastroLoteOrEdit />)
+  return (<CadastroTanqueOrEdit />)
 }

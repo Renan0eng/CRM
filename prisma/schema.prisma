@@ -106,10 +106,11 @@ model Lote {
 model Tanque {
   id              String        @id @default(cuid())
   id_lote         String
-  name            String
-  description     String?
+  nome            String
+  descricao       String?
   kg              Float
   qtd             Float
+  area            Float         @default(0)
   created         DateTime      @default(now())
   user_created_id String
   updated         DateTime      @default(now()) @updatedAt

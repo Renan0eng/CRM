@@ -110,7 +110,7 @@ export default function CadastroLoteOrEdit({
   return (
     <div className="w-full text-text flex p-4 flex-col gap-4 scrollable overflow-scroll h-full">
       <div className="flex w-full justify-between">
-        <span className="text-4xl font-bold" > Lotes</span>
+        <span className="text-4xl font-bold" >Cadastro de Lote</span>
         <div className="flex gap-4 font-bold">
           <Button variant="outline" className="w-full"
             onClick={(e) => {
