@@ -37,7 +37,7 @@ export default function HomeTopNav() {
           </div>
         </div>
         <div className='flex gap-3'>
-          <Link href="/auth/login">
+          <Link href="/admin">
             <Button className='rounded-full bg-white text-neutrals-500 hover:bg-primary-500/10'>
               Entrar
             </Button>

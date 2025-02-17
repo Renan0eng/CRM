@@ -68,11 +68,18 @@ model User {
   @@index([user_id_delete])
 }
 
+enum Estagio {
+  cria
+  recria
+  engorda
+  abate
+}
+
 model Lote {
   id              String            @id @default(cuid())
   nome            String
   descricao       String?
-  estagio         String            @default("cria") //cria, recria, engorda e abate
+  estagio         Estagio           @default(cria)
   qtd             Int?
   kg              Float?
   id_father       Int?

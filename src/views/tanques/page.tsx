@@ -9,11 +9,11 @@ import { Plus, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function Lotes() {
+export default function Tanques() {
   const router = useRouter()
 
   useEffect(() => {
-    router.prefetch("/admin/lotes/tanques/cadastro");
+    router.prefetch("/admin/tanques/cadastro");
     router.prefetch("/admin");
   }, [])
 
@@ -34,7 +34,7 @@ export default function Lotes() {
           <Button className="w-full"
             onClick={(e) => {
               e.preventDefault();
-              router.push("/admin/lotes/cadastro");
+              router.push("/admin/tanques/cadastro");
             }}
           >
             <Plus />
@@ -51,7 +51,7 @@ export default function Lotes() {
           <div className="px-4 py-8 bg-background-foreground rounded-md w-full flex h-[50%]">
             <div className="flex w-full flex-col">
               <div>
-                <p className="text-xl font-bold">Consumo de Ração</p>
+                <p className="text-xl font-bold">Estado Atual Tanques</p>
                 <p>January - June 2024</p>
               </div>
               <div>
@@ -66,30 +66,9 @@ export default function Lotes() {
             <div className="flex w-full flex-col">
               <div className="flex gap-4">
                 <div>
-                  <p className="text-xl font-bold">Consumo de Ração</p>
+                  <p className="text-xl font-bold"></p>
                   <p>January - June 2024</p>
                 </div>
-                <Select>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Periodo" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-input-border text-text">
-                    <SelectGroup>
-                      <SelectItem value="janeiro">Janeiro</SelectItem>
-                      <SelectItem value="fevereiro">Fevereiro</SelectItem>
-                      <SelectItem value="marco">Março</SelectItem>
-                      <SelectItem value="abril">Abril</SelectItem>
-                      <SelectItem value="maio">Maio</SelectItem>
-                      <SelectItem value="junho">Junho</SelectItem>
-                      <SelectItem value="julho">Julho</SelectItem>
-                      <SelectItem value="agosto">Agosto</SelectItem>
-                      <SelectItem value="setembro">Setembro</SelectItem>
-                      <SelectItem value="outubro">Outubro</SelectItem>
-                      <SelectItem value="novembro">Novembro</SelectItem>
-                      <SelectItem value="dezembro">Dezembro</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
               </div>
               <div>
                 <ChartRacaoBar />
@@ -97,9 +76,6 @@ export default function Lotes() {
             </div>
           </div>
         </div>
-      </div>
-      <div>
-        <ChartFullLine />
       </div>
     </div >
   )
