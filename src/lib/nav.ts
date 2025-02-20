@@ -60,6 +60,10 @@ export const data = {
           url: "/admin/produtos/cadastro",
         },
         {
+          title: "Cadastro Movimentos",
+          url: "/admin/produtos/movimentos/cadastro",
+        },
+        {
           title: "Cadastro Tags",
           url: "/admin/produtos/tags/cadastro",
         },

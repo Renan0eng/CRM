@@ -39,10 +39,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { deleteProdutoByIds, getProdutos, ProdutoTag } from "@/models/produtos"
+import { Paginate } from "../paginate"
 
-
-
-export function ProdutoDataTable() {
+export function ProdutoDataTable({
+  header
+}: {
+  header?: boolean
+}) {
   const [sorting, setSorting] = useState<any>([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -273,7 +276,7 @@ export function ProdutoDataTable() {
 
   return (
     <div className="p-4 bg-background-foreground rounded-md w-full h-full overflow-x-auto">
-      <div className="flex w-full justify-between">
+      {header && <div className="flex w-full justify-between">
         <span className="text-4xl font-bold" >Produtos</span>
         <div className="flex gap-4 font-bold">
           <Button className="w-full"
@@ -286,7 +289,7 @@ export function ProdutoDataTable() {
             Cadastrar
           </Button>
         </div>
-      </div >
+      </div >}
       <div className="flex items-center py-4 justify-between gap-4 w-full">
         <Input
           placeholder="Filto Nome e Descrição"
@@ -435,74 +438,7 @@ export function ProdutoDataTable() {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} de{" "}
-          {qtd} row(s) selected.
-        </div>
-        <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Linhas por pagina</p>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value))
-            }}
-          >
-            <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[10, 20, 30, 40, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to first page</span>
-            <ChevronsLeft />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            className="h-8 w-8 p-0"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRight />
-          </Button>
-          <Button
-            variant="outline"
-            className="hidden h-8 w-8 p-0 lg:flex"
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-            disabled={!table.getCanNextPage()}
-          >
-            <span className="sr-only">Go to last page</span>
-            <ChevronsRight />
-          </Button>
-        </div>
-      </div>
+      <Paginate qtd={qtd} table={table} />
     </div >
   )
 }

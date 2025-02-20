@@ -27,3 +27,22 @@ export const cadastroTagSchema = z.object({
 });
 
 export type CadastroTagSchema = z.infer<typeof cadastroTagSchema>;
+
+
+export const cadastroMovimentoSchema = z.object({
+  id: z.string().optional(),
+  tipo: z.enum(["entrada", "saida"], {
+    errorMap: () => ({ message: "Estágio inválido. Deve ser 'entrada' ou 'saida'" }),
+  }),
+  qtd: z.number().refine((val) => val > 0, {
+    message: "A quantidade deve ser maior que 0",
+  }),
+  descricao: z.string().optional(),
+  id_produto: z.string().min(1, "O ID do produto é obrigatório"),
+  id_lote: z.string().optional(),
+  id_tanque: z.string().optional(),
+  data_movimento: z.date().optional(),
+});
+
+// Inferindo o tipo TypeScript a partir do schema Zod
+export type CadastroMovimentoSchema = z.infer<typeof cadastroMovimentoSchema>;

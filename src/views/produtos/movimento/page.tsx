@@ -15,8 +15,6 @@ export default function Produtos() {
 
   useEffect(() => {
     router.prefetch("/admin/produtos/cadastro");
-    router.prefetch("/admin/produtos/tags/cadastro");
-    router.prefetch("/admin/produtos/movimentos/cadastro");
     router.prefetch("/admin");
   }, [])
 

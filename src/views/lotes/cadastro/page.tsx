@@ -176,8 +176,6 @@ export default function CadastroLoteOrEdit({
                   <p className="text-sm text-red-500">{errors.kg.message}</p>
                 )}
               </div>
-
-              {/* Campo Quantidade */}
               <div className="w-full gap-2">
                 <Label className="text-text-foreground font-semibold text-md" htmlFor="qtd">
                   Quantidade

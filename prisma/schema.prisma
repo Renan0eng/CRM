@@ -104,21 +104,22 @@ model Lote {
 }
 
 model Tanque {
-  id              String        @id @default(cuid())
+  id              String             @id @default(cuid())
   id_lote         String
   nome            String
   descricao       String?
   kg              Float
   qtd             Float
-  area            Float         @default(0)
-  created         DateTime      @default(now())
+  area            Float              @default(0)
+  created         DateTime           @default(now())
   user_created_id String
-  updated         DateTime      @default(now()) @updatedAt
+  updated         DateTime           @default(now()) @updatedAt
   user_updated_id String?
-  deleted         Boolean       @default(false)
+  deleted         Boolean            @default(false)
   user_deleted_id String?
-  Lote            Lote          @relation(fields: [id_lote], references: [id])
+  Lote            Lote               @relation(fields: [id_lote], references: [id])
   biometrias      Biometria[]
+  ProdutoMoviment ProdutoMovimento[]
   mortalidades    Mortalidade[]
 
   @@index([id_lote])
@@ -212,15 +213,20 @@ model Produto_tag {
   Produto Produto[]
 }
 
+enum Type_Mov {
+  entrada
+  saida
+}
+
 model ProdutoMovimento {
   id              String    @id @default(cuid())
-  type            String
-  quantity        Float
-  productId       String
-  id_lote         String
-  product_name    String?
-  description     String?
-  data_moviment   DateTime  @default(now())
+  tipo            Type_Mov
+  qtd             Float
+  id_produto      String
+  id_lote         String?
+  id_tanque       String?
+  descricao       String?
+  data_movimento  DateTime  @default(now())
   created         DateTime  @default(now())
   user_created_id String
   updated         DateTime  @default(now()) @updatedAt
@@ -228,12 +234,14 @@ model ProdutoMovimento {
   deleted         Boolean   @default(false)
   user_deleted_id String?
   closed          DateTime?
-  Produto         Produto   @relation(fields: [productId], references: [id])
-  Lote            Lote?     @relation(fields: [id_lote], references: [id])
+  Produto         Produto   @relation(fields: [id_produto], references: [id])
+  lote            Lote?     @relation(fields: [id_lote], references: [id])
+  tanque          Tanque?   @relation(fields: [id_tanque], references: [id])
 
   @@index([id])
   @@index([id_lote])
-  @@index([productId])
+  @@index([id_tanque])
+  @@index([id_produto])
   @@index([user_created_id])
   @@index([user_updated_id])
   @@index([user_deleted_id])
