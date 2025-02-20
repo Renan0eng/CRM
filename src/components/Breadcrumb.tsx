@@ -16,25 +16,11 @@ export function BreadcrumbDynamic() {
   const pathSegments = pathname.replace("/admin", "").split("/").filter((segment) => segment);
 
 
-  <Breadcrumb>
-    <BreadcrumbList>
-      <BreadcrumbItem className="hidden md:block">
-        <BreadcrumbLink href="#" className="text-text">
-          Building Your Application
-        </BreadcrumbLink>
-      </BreadcrumbItem>
-      <BreadcrumbSeparator className="hidden md:block text-text" />
-      <BreadcrumbItem>
-        <BreadcrumbPage className="text-text">Data Fetching</BreadcrumbPage>
-      </BreadcrumbItem>
-    </BreadcrumbList>
-  </Breadcrumb>
-
   return (
-    <Breadcrumb>
-      <BreadcrumbList >
+    <Breadcrumb >
+      <BreadcrumbList className="text-xs md:text-sm">
         {/* Link para a página inicial */}
-        <BreadcrumbItem className="hidden md:block">
+        <BreadcrumbItem>
           <BreadcrumbLink href="/admin" className="text-text">
             Home
           </BreadcrumbLink>
@@ -46,12 +32,12 @@ export function BreadcrumbDynamic() {
           const isLastSegment = index === pathSegments.length - 1;
 
           return (
-            <div key={index} className="flex gap-2 justify-center items-center">
+            <div key={index} className="flex gap-[2px] md:gap-2 justify-center items-center">
               {/* Separador */}
-              <BreadcrumbSeparator className="hidden md:block text-text" />
+              <BreadcrumbSeparator className=" text-text" />
 
               {/* Item do breadcrumb */}
-              <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbItem>
                 {isLastSegment ? (
                   <BreadcrumbPage className="text-text">
                     {capitalize(segment)}

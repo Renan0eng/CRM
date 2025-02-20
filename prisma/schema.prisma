@@ -76,25 +76,25 @@ enum Estagio {
 }
 
 model Lote {
-  id              String            @id @default(cuid())
+  id              String             @id @default(cuid())
   nome            String
   descricao       String?
-  estagio         Estagio           @default(cria)
+  estagio         Estagio            @default(cria)
   qtd             Int?
   kg              Float?
   id_father       Int?
-  created         DateTime          @default(now())
+  created         DateTime           @default(now())
   user_created_id String
-  updated         DateTime          @default(now()) @updatedAt
+  updated         DateTime           @default(now()) @updatedAt
   user_updated_id String?
-  deleted         Boolean           @default(false)
+  deleted         Boolean            @default(false)
   user_deleted_id String?
   close           DateTime?
   user_close_id   Int?
-  entrada         DateTime          @default(now())
+  entrada         DateTime           @default(now())
   Biometrias      Biometria[]
   tanques         Tanque[]
-  ProdutoMoviment ProductMovement[]
+  ProdutoMoviment ProdutoMovimento[]
   mortalidade     Mortalidade[]
 
   @@index([id])
@@ -177,23 +177,28 @@ model Biometria {
   @@index([user_deleted_id])
 }
 
-model Product {
-  id              String            @id @default(cuid())
-  name            String
-  description     String?
-  price           Float?
-  cost            Float?
-  image_url       String?           @default("https://i.imgur.com/6VBx3io.png")
-  type_med        String            @default("unidade")
-  visible         Boolean           @default(true)
-  tag             Product_tag[]
-  created         DateTime          @default(now())
+enum Type_med {
+  unidade
+  kg
+}
+
+model Produto {
+  id              String             @id @default(cuid())
+  nome            String
+  descricao       String?
+  preco           Float?
+  custo           Float?
+  image_url       String?            @default("https://i.imgur.com/6VBx3io.png")
+  type_med        Type_med           @default(unidade)
+  visivel         Boolean            @default(true)
+  tag             Produto_tag[]
+  created         DateTime           @default(now())
   user_created_id String
-  updated         DateTime          @default(now()) @updatedAt
+  updated         DateTime           @default(now()) @updatedAt
   user_updated_id String?
-  deleted         Boolean           @default(false)
+  deleted         Boolean            @default(false)
   user_deleted_id String?
-  movements       ProductMovement[]
+  movementos      ProdutoMovimento[]
 
   @@index([id])
   @@index([user_created_id])
@@ -201,13 +206,13 @@ model Product {
   @@index([user_deleted_id])
 }
 
-model Product_tag {
+model Produto_tag {
   id      String    @id @default(cuid())
-  name    String    @unique
-  Product Product[]
+  nome    String    @unique
+  Produto Produto[]
 }
 
-model ProductMovement {
+model ProdutoMovimento {
   id              String    @id @default(cuid())
   type            String
   quantity        Float
@@ -223,7 +228,7 @@ model ProductMovement {
   deleted         Boolean   @default(false)
   user_deleted_id String?
   closed          DateTime?
-  Product         Product   @relation(fields: [productId], references: [id])
+  Produto         Produto   @relation(fields: [productId], references: [id])
   Lote            Lote?     @relation(fields: [id_lote], references: [id])
 
   @@index([id])

@@ -24,7 +24,7 @@ export default async function RootLayout({
   return (
     <html>
       <body
-        className={`${inter.className}`}
+        className={`${inter.className} !bg-white`}
       >
         <main style={{
           backgroundImage: "url('/background.png')",

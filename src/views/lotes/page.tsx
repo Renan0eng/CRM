@@ -4,7 +4,6 @@ import { ChartRacaoBar } from "@/components/charts/chartRacaoBar";
 import { ChartRacaoPie } from "@/components/charts/chartRacaoPie";
 import { LoteDataTable } from "@/components/tables/lotesTable/table";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -13,7 +12,7 @@ export default function Lotes() {
   const router = useRouter()
 
   useEffect(() => {
-    router.prefetch("/admin/lotes/tanques/cadastro");
+    router.prefetch("/admin/lotes/cadastro");
     router.prefetch("/admin");
   }, [])
 
@@ -42,14 +41,14 @@ export default function Lotes() {
           </Button>
         </div>
       </div >
-      <div className="flex w-full gap-4">
+      <div className="flex w-full gap-4 flex-col xxl:flex-row">
         {/* Table */}
         <LoteDataTable />
         {/* Cards */}
-        <div className="w-full gap-4 flex flex-col ">
+        <div className="w-full gap-4 flex flex-col xl:flex-row xxl:flex-col">
           {/* Ração */}
-          <div className="px-4 py-8 bg-background-foreground rounded-md w-full flex h-[50%]">
-            <div className="flex w-full flex-col">
+          <div className="px-4 py-8 bg-background-foreground rounded-md w-full flex  flex-col  sm:flex-row xl:flex-row">
+            <div className="flex flex-col justify-between h-full w-full">
               <div>
                 <p className="text-xl font-bold">Consumo de Ração</p>
                 <p>January - June 2024</p>
@@ -61,35 +60,14 @@ export default function Lotes() {
             <ChartRacaoPie />
           </div>
           {/* Engorda */}
-          <div className="px-4 py-8 bg-background-foreground rounded-md w-full flex h-[50%]">
+          <div className="px-4 py-8 bg-background-foreground rounded-md w-full flex  flex-col-reverse  sm:flex-row xl:flex-row">
             <ChartRacaoPie />
             <div className="flex w-full flex-col">
               <div className="flex gap-4">
                 <div>
-                  <p className="text-xl font-bold">Consumo de Ração</p>
+                  <p className="text-xl font-bold">Total Kg</p>
                   <p>January - June 2024</p>
                 </div>
-                <Select>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Periodo" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border-input-border text-text">
-                    <SelectGroup>
-                      <SelectItem value="janeiro">Janeiro</SelectItem>
-                      <SelectItem value="fevereiro">Fevereiro</SelectItem>
-                      <SelectItem value="marco">Março</SelectItem>
-                      <SelectItem value="abril">Abril</SelectItem>
-                      <SelectItem value="maio">Maio</SelectItem>
-                      <SelectItem value="junho">Junho</SelectItem>
-                      <SelectItem value="julho">Julho</SelectItem>
-                      <SelectItem value="agosto">Agosto</SelectItem>
-                      <SelectItem value="setembro">Setembro</SelectItem>
-                      <SelectItem value="outubro">Outubro</SelectItem>
-                      <SelectItem value="novembro">Novembro</SelectItem>
-                      <SelectItem value="dezembro">Dezembro</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
               </div>
               <div>
                 <ChartRacaoBar />

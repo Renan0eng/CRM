@@ -1,4 +1,4 @@
-import { Grid3X3, ListOrdered, Wrench } from "lucide-react";
+import { Grid3X3, ListOrdered, ShoppingCart, Wrench } from "lucide-react";
 
 export const data = {
   user: {
@@ -47,6 +47,21 @@ export const data = {
         {
           title: "Cadastro",
           url: "/admin/tanques/cadastro",
+        },
+      ],
+    },
+    {
+      title: "Produtos",
+      url: "/admin/produtos",
+      icon: ShoppingCart,
+      items: [
+        {
+          title: "Cadastro",
+          url: "/admin/produtos/cadastro",
+        },
+        {
+          title: "Cadastro Tags",
+          url: "/admin/produtos/tags/cadastro",
         },
       ],
     },

@@ -60,7 +60,7 @@ export function ChartRacaoPie() {
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square w-[30%]"
+      className="mx-auto aspect-square w-[65%] ssm:w-[50%] sm:w-[40%] md:w-[45%] md2:w-[35%] lg:w-[30%] xl:w-[60%] xxl:w-[35%]"
     >
       <PieChart>
         <ChartTooltip
