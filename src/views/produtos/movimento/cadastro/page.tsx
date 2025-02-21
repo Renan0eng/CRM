@@ -1,5 +1,4 @@
 "use client"
-// import { MovimentoDataTable } from "@/components/tables/prostutos/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +16,8 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { createProdutoMovimentoOrUpdate } from "@/models/movimento";
+import { CreateProdutoMovimento, createProdutoMovimentoOrUpdate } from "@/models/movimento";
+import { MovimentoDataTable } from "@/components/tables/prostutos/movimentos/table";
 
 export default function CadastroMovimentoOrEdit({
   defaultValues,
@@ -116,14 +116,22 @@ export default function CadastroMovimentoOrEdit({
     try {
 
 
-      const { id_lote, id_tanque, id_produto, ...send } = data
+      const { id_lote, id_tanque, id_produto, ...send } = data;
 
-      const response = await createProdutoMovimentoOrUpdate({
+      let produtoMov = {
         ...send,
-        lote: { connect: { id: data.id_lote } },
-        tanque: { connect: { id: data.id_tanque } },
         Produto: { connect: { id: data.id_produto } }
-      });
+      } as CreateProdutoMovimento;
+
+      if (produtoMov.lote) {
+        produtoMov.lote = { connect: { id: data.id_lote } };
+      }
+
+      if (produtoMov.tanque) {
+        produtoMov.tanque = { connect: { id: data.id_tanque } };
+      }
+
+      const response = await createProdutoMovimentoOrUpdate(produtoMov);
 
       if (response) {
         if (response.status) {
@@ -323,7 +331,7 @@ export default function CadastroMovimentoOrEdit({
         </form>
       </div>
       <div className="w-full h-full ">
-        {/* <MovimentoDataTable /> */}
+        <MovimentoDataTable />
       </div>
     </div >
   )

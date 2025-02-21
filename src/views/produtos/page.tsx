@@ -3,6 +3,7 @@ import { ChartFullLine } from "@/components/charts/chartFullLine";
 import { ChartRacaoBar } from "@/components/charts/chartRacaoBar";
 import { ChartRacaoPie } from "@/components/charts/chartRacaoPie";
 import { LoteDataTable } from "@/components/tables/lotesTable/table";
+import { MovimentoDataTable } from "@/components/tables/prostutos/movimentos/table";
 import { ProdutoDataTable } from "@/components/tables/prostutos/table";
 import { TagDataTable } from "@/components/tables/prostutos/tags/table";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ export default function Produtos() {
       </div >
       <div className="flex w-full gap-4 flex-col xxl:flex-row">
         {/* Table */}
-        <ProdutoDataTable />
+        <MovimentoDataTable />
         {/* Cards */}
         <div className="w-full gap-4 flex flex-col xl:flex-row xxl:flex-col">
           {/* Ração */}

@@ -4,7 +4,7 @@ import { getUserId } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { Prisma, ProdutoMovimento } from "@prisma/client";
 
-type CreateProdutoMovimento = Omit<
+export type CreateProdutoMovimento = Omit<
   Prisma.ProdutoMovimentoCreateInput,
   "user_created_id"
 > &
@@ -53,6 +53,12 @@ export async function createProdutoMovimentoOrUpdate(
   }
 }
 
+export type ProdutoMovimentoProduto = Prisma.ProdutoMovimentoGetPayload<{
+  include: {
+    Produto: true;
+  };
+}>;
+
 export async function getProdutoMovimentos(
   take: number = 10,
   page: number = 0,
@@ -63,7 +69,7 @@ export async function getProdutoMovimentos(
   message: string;
   status: boolean;
   data?: {
-    produtoMovimentos: ProdutoMovimento[];
+    produtoMovimentos: ProdutoMovimentoProduto[];
     pages: number;
     qtd: number;
   };
@@ -85,6 +91,9 @@ export async function getProdutoMovimentos(
       orderBy: { [sortBy]: sortOrder },
       take: take,
       skip: take * page,
+      include: {
+        Produto: true,
+      },
     });
 
     // Conta o total de registros para calcular as páginas

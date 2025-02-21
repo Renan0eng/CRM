@@ -6,7 +6,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Delete, Edit2, MoreHorizontal, OctagonX, Plus, ReceiptText, RefreshCcw } from "lucide-react"
+import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Delete, Edit2, MoreHorizontal, OctagonX, Plus, ReceiptText, RefreshCcw, Undo2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -30,18 +30,20 @@ import {
 } from "@/components/ui/table"
 
 import { useEffect, useState } from "react"
-import { Produto, Produto_tag } from "@prisma/client"
+import { Produto, ProdutoMovimento } from "@prisma/client"
 import { useAlert } from "@/hooks/use-alert"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../ui/select"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { deleteProdutoByIds, getProdutos, ProdutoTag } from "@/models/produtos"
-import { Paginate } from "../paginate"
+import { Paginate } from "../../paginate"
+import { deleteProdutoMovimentoByIds, getProdutoMovimentos, ProdutoMovimentoProduto } from "@/models/movimento"
 
-export function ProdutoDataTable({
+
+
+export function MovimentoDataTable({
   header
 }: {
   header?: boolean
@@ -49,26 +51,25 @@ export function ProdutoDataTable({
   const [sorting, setSorting] = useState<any>([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
-  const [data, setData] = useState<ProdutoTag[]>([]);
+  const [data, setData] = useState<ProdutoMovimentoProduto[]>([]);
   const [pages, setPages] = useState<number>(0);
   const [qtd, setQtd] = useState<number>(0);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
-  const [filter, setFilter] = useState<string>(""); // Estado para o filtro
+  const [filter, setFilter] = useState<string>("");
   const alert = useAlert();
 
-  const [detalhes, setDetalhes] = useState<Produto>();
+  const [detalhes, setDetalhes] = useState<ProdutoMovimentoProduto>();
 
-  // Função para buscar dados do backend
   async function getData() {
-    const response = await getProdutos(
+    const response = await getProdutoMovimentos(
       pagination.pageSize,
       pagination.pageIndex,
-      filter, // Passa o filtro
-      sorting.length > 0 ? sorting[0].id : "id", // Campo de ordenação
-      sorting.length > 0 ? sorting[0].desc ? "desc" : "asc" : "asc" // Ordem
+      filter,
+      sorting.length > 0 ? sorting[0].id : "created",
+      sorting.length > 0 ? sorting[0].desc ? "desc" : "asc" : "asc"
     );
 
     if (!response.status) {
@@ -76,19 +77,18 @@ export function ProdutoDataTable({
     }
 
     if (response?.data) {
-      setData(response.data.produtos);
+      setData(response.data.produtoMovimentos);
       setPages(response.data.pages);
       setQtd(response.data.qtd);
     }
   }
 
-  // Atualiza os dados quando a paginação, filtro ou ordenação mudam
   useEffect(() => {
     getData();
     setRowSelection([]);
   }, [pagination, filter, sorting]);
 
-  const columns: ColumnDef<Produto>[] = [
+  const columns: ColumnDef<ProdutoMovimentoProduto>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -112,7 +112,7 @@ export function ProdutoDataTable({
       enableHiding: false,
     },
     {
-      accessorKey: "nome",
+      accessorKey: "Produto",
       header: ({ column }) => {
         return (
           <div className="flex w-full justify-center">
@@ -121,18 +121,18 @@ export function ProdutoDataTable({
               className="text-primary hover:text-text font-bold hover:bg-transparent"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-              Nome
+              Produto
               <ArrowUpDown />
             </Button>
           </div>
         )
       },
       cell: ({ row }) => (
-        <div className="text-text flex w-full justify-center">{row.getValue("nome")}</div>
+        <div className="text-text flex w-full justify-center">{row.original.Produto.nome}</div>
       ),
     },
     {
-      accessorKey: "type_med",
+      accessorKey: "tipo",
       header: ({ column }) => {
         return (
           <div className="flex w-full justify-center">
@@ -141,16 +141,18 @@ export function ProdutoDataTable({
               className="text-primary hover:text-text font-bold hover:bg-transparent"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-              Medida
+              Tipo
               <ArrowUpDown />
             </Button>
           </div>
         )
       },
-      cell: ({ row }) => <div className="text-text flex w-full justify-center">{row.getValue("type_med")}</div>,
+      cell: ({ row }) => (
+        <div className="text-text flex w-full justify-center">{row.original.tipo}</div>
+      ),
     },
     {
-      accessorKey: "visivel",
+      accessorKey: "qtd",
       header: ({ column }) => {
         return (
           <div className="flex w-full justify-center">
@@ -159,35 +161,15 @@ export function ProdutoDataTable({
               className="text-primary hover:text-text font-bold hover:bg-transparent"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-              Visibilidade
+              Quantidade
               <ArrowUpDown />
             </Button>
           </div>
         )
       },
-      cell: ({ row }) => <div className="text-text flex w-full justify-center">{row.getValue("visivel") ? "Sim" : "Não"}</div>,
-    },
-    {
-      accessorKey: "tag",
-      header: ({ column }) => {
-        return (
-          <div className="flex w-full justify-center">
-            <Button
-              variant="ghost"
-              className="text-primary hover:text-text font-bold hover:bg-transparent"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-              Tag
-              <ArrowUpDown />
-            </Button>
-          </div>
-        )
-      },
-      cell: ({ row }) => {
-        const tags: Produto_tag[] = row.getValue("tag");
-
-        return <div className="text-text flex w-full justify-center">{tags.map((tag) => tag.nome)}</div>
-      },
+      cell: ({ row }) => (
+        <div className="text-text flex w-full justify-center">{row.original.qtd}</div>
+      ),
     },
     {
       id: "actions",
@@ -207,7 +189,7 @@ export function ProdutoDataTable({
                 const selectedId = Object.keys(rowSelection).map((key) => {
                   return data[parseInt(key)].id
                 })
-                deleteProdutoByIds(selectedId);
+                deleteProdutoMovimentoByIds(selectedId);
                 getData();
               }}><Delete />Deletar</DropdownMenuItem>
             </DropdownMenuContent>
@@ -218,7 +200,6 @@ export function ProdutoDataTable({
         const payment = row.original
 
         const router = useRouter()
-
 
         return (
           <>
@@ -233,13 +214,13 @@ export function ProdutoDataTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" >
                 <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => setDetalhes(payment)}>
+                {/* <DropdownMenuItem onClick={() => setDetalhes(payment)}>
                   <ReceiptText /> Detalhes
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuSeparator className="bg-input-border" />
-                <DropdownMenuItem onClick={() => router.push(`/admin/produtos/editar/${payment.id}`)}><Edit2 />Editar</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push(`/admin/produtos/tags/editar/${payment.id}`)}><Edit2 />Editar</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
-                  deleteProdutoByIds([row.original.id])
+                  deleteProdutoMovimentoByIds([row.original.id])
                   getData()
                 }}><Delete />Deletar</DropdownMenuItem>
               </DropdownMenuContent>
@@ -273,14 +254,14 @@ export function ProdutoDataTable({
   const router = useRouter();
 
   return (
-    <div className="p-4 bg-background-foreground rounded-md w-full h-full overflow-x-auto">
+    <div className="p-4 bg-background-foreground rounded-md w-full">
       {header && <div className="flex w-full justify-between">
-        <span className="text-4xl font-bold" >Produtos</span>
+        <span className="text-4xl font-bold" >ProdutoMovimentos</span>
         <div className="flex gap-4 font-bold">
           <Button className="w-full"
             onClick={(e) => {
               e.preventDefault();
-              router.push("/admin/produtos/cadastro");
+              router.push("/admin/produtos/tags/cadastro");
             }}
           >
             <Plus />
