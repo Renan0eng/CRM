@@ -50,9 +50,11 @@ export async function createProdutoOrUpdate(
         ...rest,
         user_created_id,
         tag: {
-          connect: tag?.map((tag) => {
-            return { id: tag };
-          }),
+          connect: tag
+            ?.filter((e) => e !== "")
+            .map((tag) => {
+              return { id: tag };
+            }),
         },
       },
     });
@@ -68,9 +70,11 @@ export async function createProdutoOrUpdate(
         ...rest,
         user_created_id,
         tag: {
-          connect: tag?.map((tag) => {
-            return { id: tag };
-          }),
+          connect: tag
+            ?.filter((e) => e !== "")
+            .map((tag) => {
+              return { id: tag };
+            }),
         },
       },
     });
@@ -178,23 +182,23 @@ export async function deleteProdutoByIds(ids: string[]): Promise<{
   status: boolean;
 }> {
   try {
-    const tag = await prisma.produto.deleteMany({
+    const produto = await prisma.produto.deleteMany({
       where: {
         id: {
-          in: ids, // Exclui todos os tags cujo ID está no array `ids`
+          in: ids,
         },
       },
     });
 
-    console.log(`Foram excluídos ${tag.count} registros.`);
+    console.log(`Foram excluídos ${produto.count} registros.`);
     return {
-      message: `Foram excluídos ${tag.count} registros.`,
+      message: `Foram excluídos ${produto.count} registros.`,
       status: true,
     };
   } catch (error) {
-    console.error("Erro ao excluir tags:", error);
+    console.error("Erro ao excluir produtos:", error);
     return {
-      message: `Erro ao excluir tags: ${error} registros.`,
+      message: `Erro ao excluir produtos: ${error} registros.`,
       status: false,
     };
   }

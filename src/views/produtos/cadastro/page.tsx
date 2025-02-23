@@ -224,6 +224,10 @@ export default function CadastroProdutoOrEdit({
                 <Label className="text-text-foreground font-semibold text-md" htmlFor="id_lote">Tag</Label>
                 {tags?.length ? <Select value={watch("tag")} onValueChange={(e: any) => {
                   const tag = watch("tag");
+                  if (e === "0") {
+                    setValue("tag", "")
+                    return
+                  }
                   setValue("tag", e)
                 }}>
                   <SelectTrigger className="w-full">
@@ -232,6 +236,7 @@ export default function CadastroProdutoOrEdit({
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>Tags</SelectLabel>
+                      <SelectItem value={"0"} >Sem tag</SelectItem>
                       {tags?.length && tags.map((tag) => <SelectItem value={tag.id} >{tag.nome}</SelectItem>)}
                     </SelectGroup>
                   </SelectContent>

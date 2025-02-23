@@ -2,30 +2,40 @@
 
 import { getUserId } from "@/lib/auth";
 import prisma from "@/lib/db";
-import { error } from "console";
+import { deleteImage } from "@/lib/upload";
 
 export async function createOrEdit(data: CreateOrEditTask) {
   console.log("data", data);
 
   if (data.id) {
+    const existingTask = await prisma.task.findUnique({
+      where: { id: data.id },
+      select: { image: true },
+    });
+
+    if (
+      (data.image &&
+        existingTask?.image &&
+        data.image !== existingTask.image) ||
+      (existingTask?.image && data.image == "")
+    ) {
+      await deleteImage(existingTask.image);
+    }
+
     const task = await prisma.task.update({
       data,
-      where: {
-        id: data.id,
-      },
+      where: { id: data.id },
     });
+
     return task;
   } else {
     const user_create_id = await getUserId();
-
-    if (user_create_id === false) return { message: "error ao buscar usuario" };
+    if (!user_create_id) return { message: "Erro ao buscar usuário" };
 
     const task = await prisma.task.create({
-      data: {
-        ...data,
-        user_create_id,
-      },
+      data: { ...data, user_create_id },
     });
+
     return task;
   }
 }

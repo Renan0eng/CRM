@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Edit, Ellipsis, Plus, Tag, Trash } from "lucide-react";
+import { Calendar, Edit, Ellipsis, Plus, Tag, Trash, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
 import { formatDateMes } from "@/lib/utils";
@@ -18,6 +18,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { taskSchema } from "@/Schemas/scrumboard";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { uploadImage } from "@/lib/upload";
 // import { createOrEditTask } from "@/models/tasks"
 
 
@@ -465,7 +466,7 @@ function TaskItem({
             <Dialog open={openDialog} onOpenChange={(e) => setOpenDialog(e)}>
               <DialogTrigger asChild>
                 <Button
-                  className="rounded-full text-text-foreground w-5 h-5 p-0  hover:bg-transparent hover:border-primary/80"
+                  className="rounded-full text-text-foreground w-5 h-5 p-0 hover:text-blue-500/80 hover:bg-transparent hover:border-primary/80"
                   variant={"ghost"}
                   onClick={() => {
                     setNewTaskName(task.name)
@@ -637,7 +638,8 @@ function FormTask({
     handleSubmit,
     formState: { errors },
     reset,
-    setValue
+    setValue,
+    watch
   } = useForm<z.infer<typeof taskSchema>>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -648,16 +650,28 @@ function FormTask({
     },
   });
 
-  const onSubmit = (data: z.infer<typeof taskSchema>) => {
+  const onSubmit = async (data: z.infer<typeof taskSchema>) => {
+
+    let imageUrl = data.taskImage as string;
+
+    if (data.taskImage instanceof File) {
+      imageUrl = await uploadImage(data.taskImage);
+    }
 
     if (id) {
-      addOrUpdateTaskToColumn(data, column.id, id);
+      addOrUpdateTaskToColumn({ ...data, taskImage: imageUrl }, column.id, id);
     } else {
-      addOrUpdateTaskToColumn(data, column.id);
+      addOrUpdateTaskToColumn({ ...data, taskImage: imageUrl }, column.id);
     }
-    reset(); // Limpa o formulário após o envio
+    reset();
     setOpenDialog(false);
   };
+
+  const [taskImage, setTaskImage] = useState<string | File>();
+
+  useEffect(() => {
+    setTaskImage(watch("taskImage"))
+  }, [watch("taskImage")])
 
   return <form onSubmit={handleSubmit(onSubmit)}>
     <Card className="w-full text-text border-0">
@@ -692,11 +706,18 @@ function FormTask({
           {/* Campo de Imagem */}
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="image">Image (url)</Label>
-            <Input
-              id="image"
-              placeholder="Image url of your task"
-              {...register("taskImage")}
-            />
+            <div className="relative">
+              {typeof taskImage === "string" && taskImage ? <Input className="disabled:cursor-default disabled:opacity-100" disabled placeholder={`${taskImage}`} /> : <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || ""; // Pega o primeiro arquivo ou string vazia
+                  setValue("taskImage", file); // Define manualmente no react-hook-form
+                }}
+              />}
+              <X className="absolute right-2 top-2 hover:text-text/80" onClick={() => setValue("taskImage", "")} />
+            </div>
             {errors.taskImage && (
               <p className="text-red-500 text-sm">{errors.taskImage.message}</p>
             )}
