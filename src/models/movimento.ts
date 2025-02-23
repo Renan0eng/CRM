@@ -56,6 +56,8 @@ export async function createProdutoMovimentoOrUpdate(
 export type ProdutoMovimentoProduto = Prisma.ProdutoMovimentoGetPayload<{
   include: {
     Produto: true;
+    lote: true;
+    tanque: true;
   };
 }>;
 
@@ -93,6 +95,8 @@ export async function getProdutoMovimentos(
       skip: take * page,
       include: {
         Produto: true,
+        lote: true,
+        tanque: true,
       },
     });
 

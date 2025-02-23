@@ -72,7 +72,10 @@ export default function CadastroMovimentoOrEdit({
     formState: { errors },
   } = useForm<CadastroMovimentoSchema>({
     resolver: zodResolver(cadastroMovimentoSchema),
-    defaultValues: defaultValues
+    defaultValues: defaultValues || {
+      data_movimento: new Date(),
+      tipo: "saida"
+    }
   })
 
   useEffect(() => {
@@ -123,11 +126,11 @@ export default function CadastroMovimentoOrEdit({
         Produto: { connect: { id: data.id_produto } }
       } as CreateProdutoMovimento;
 
-      if (produtoMov.lote) {
+      if (id_lote) {
         produtoMov.lote = { connect: { id: data.id_lote } };
       }
 
-      if (produtoMov.tanque) {
+      if (id_tanque) {
         produtoMov.tanque = { connect: { id: data.id_tanque } };
       }
 
@@ -137,9 +140,8 @@ export default function CadastroMovimentoOrEdit({
         if (response.status) {
           if (defaultValues) {
             router.back();
-          } else {
-            reset();
           }
+          reset();
         }
         alert.setAlert(
           response.message,
@@ -237,7 +239,7 @@ export default function CadastroMovimentoOrEdit({
             <div className=" flex flex-col w-full gap-8 md:flex-row">
               <div className="w-full gap-2">
                 <Label className="text-text-foreground font-semibold text-md" htmlFor="tipo">Tipo</Label>
-                <Select value={watch("tipo")} defaultValue="entrada" onValueChange={(e: any) => {
+                <Select value={watch("tipo")} onValueChange={(e: any) => {
                   setValue("tipo", e)
                 }}>
                   <SelectTrigger className="w-full">

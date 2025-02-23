@@ -121,6 +121,38 @@ export function MovimentoDataTable({
               className="text-primary hover:text-text font-bold hover:bg-transparent"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
+              Link
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => {
+
+        let link = ""
+
+        if (row.original.lote) {
+          link = `Lote - ${row.original.lote.nome}`
+        }
+        if (row.original.tanque) {
+          link = `Tanque - ${row.original.tanque.nome}`
+        }
+
+        return (
+          <div className="text-text flex w-full justify-center">{link}</div>
+        )
+      },
+    },
+    {
+      accessorKey: "Produto",
+      header: ({ column }) => {
+        return (
+          <div className="flex w-full justify-center">
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-text font-bold hover:bg-transparent"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
               Produto
               <ArrowUpDown />
             </Button>
