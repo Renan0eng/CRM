@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
 
+enum Status {
+  Start = "start",
+  Middle = "middle",
+  End = "end",
+}
+
 interface DayInfo {
   day: number;
   isCurrentMonth: boolean;
   monthIndex: number;
+  tasks?: {
+    nome: string;
+    status: Status;
+  }[]
 }
 
 function CalendarTable({
@@ -33,7 +43,9 @@ function CalendarTable({
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      currentWeek.push({ day, isCurrentMonth: true, monthIndex: month });
+      currentWeek.push({
+        day, isCurrentMonth: true, monthIndex: month,
+      });
       if (currentWeek.length === 7) {
         newWeeks.push(currentWeek);
         currentWeek = [];
@@ -62,13 +74,21 @@ function CalendarTable({
         <tbody>
           {weeks.map((week, index) => (
             <tr key={index}>
-              {week.map(({ day, isCurrentMonth, monthIndex }, idx) => (
+              {week.map(({
+                day,
+                isCurrentMonth,
+                monthIndex,
+                tasks
+              }, idx) => (
                 <td
                   key={idx}
-                  className={`border border-table-border p-2 align-text-top text-right h-36 ${day === today.getDate() && isCurrentMonth && month === today.getMonth() && year === today.getFullYear() ? "bg-background/25 font-bold" : ""} ${isCurrentMonth ? "text-text" : "text-text-foreground"}
+                  className={`border border-table-border align-text-top text-right h-36 ${day === today.getDate() && isCurrentMonth && month === today.getMonth() && year === today.getFullYear() ? "bg-background/25 font-bold" : ""} ${isCurrentMonth ? "text-text" : "text-text-foreground"}
                   `}
                 >
-                  {day}
+                  <div className="p-2">
+                    {day}
+                  </div>
+                  {tasks && tasks.map((task) => (<div className="flex w-full h-8 bg-red-500">{task.nome}</div>))}
                 </td>
               ))}
             </tr>
