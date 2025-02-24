@@ -19,9 +19,6 @@ import { z } from "zod";
 import { taskSchema } from "@/Schemas/scrumboard";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadImage } from "@/lib/upload";
-// import { createOrEditTask } from "@/models/tasks"
-
-
 
 export default function TasksPage() {
   const [columns, setColumns] = useState<Columns>({});
@@ -88,16 +85,13 @@ export default function TasksPage() {
   const onDragEnd = (result: DropResult) => {
     const { source, destination, type } = result;
 
-    // Se não houver destino, não fazemos nada
     if (!destination) return;
 
-    // Reordenar colunas
     if (type === "COLUMN") {
       reorderColumns(source.index, destination.index);
       return;
     }
 
-    // Reordenar tarefas dentro das colunas
     if (source.droppableId === destination.droppableId) {
       const column = columns[source.droppableId];
       const reorderedTasks = reorder(column.tasks, source.index, destination.index);

@@ -11,6 +11,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      boxShadow: {
+        sm: "0px 0px 12px rgba(255, 255, 255, 0.1)",
+        "custom-md": "0 4px 6px rgba(0, 0, 0, 0.15)",
+        "custom-lg": "0 10px 15px rgba(0, 0, 0, 0.2)", // Sombra grande personalizada
+        "custom-xl": "0 20px 25px rgba(0, 0, 0, 0.25)", // Sombra extra grande personalizada
+        "custom-inset": "inset 0 4px 6px rgba(0, 0, 0, 0.1)", // Sombra interna
+        custom: "0px 0px 3px 0px rgba(0,0,0,0.17)",
+      },
       screens: {
         ssm: "450px",
         sm: "640px",
@@ -194,9 +202,6 @@ const config: Config = {
       },
       fontFamily: {
         inter: ["Inter", "sans-serif"], // Define "Inter" como a fonte principal
-      },
-      boxShadow: {
-        custom: "0px 0px 3px 0px rgba(0,0,0,0.17)",
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -27,7 +27,7 @@ export default async function RootLayout({
         className={`${inter.className} !bg-white`}
       >
         <main style={{
-          backgroundImage: "url('/background.png')",
+          backgroundImage: "url('/background.webp')",
           backgroundAttachment: "fixed",
         }}>
           {/* Top nav */}

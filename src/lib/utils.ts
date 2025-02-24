@@ -72,3 +72,18 @@ export const formatDateMes = (date: Date): string => {
     .format(date)
     .replace(",", "."); // Adiciona o ponto ao final do mês
 };
+
+export const meses = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];

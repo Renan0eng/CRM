@@ -1,12 +1,35 @@
 'use client';
 
+import CalendarTable from "@/components/tables/calendar/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { meses } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Calendar() {
+
+  const today: Date = new Date();
+
+  const [year, setYear] = useState<number>(today.getFullYear());
+  const [month, setMonth] = useState<number>(today.getMonth());
+
+  const changeMonth = (offset: number) => {
+    let newMonth = month + offset;
+    let newYear = year;
+    if (newMonth > 11) {
+      newMonth = 0;
+      newYear++;
+    } else if (newMonth < 0) {
+      newMonth = 11;
+      newYear--;
+    }
+    setMonth(newMonth);
+    setYear(newYear);
+  };
+
   return (
-    <Card className="m-4">
+    <Card className="m-4 border-0">
       <CardHeader className="flex flex-col gap-4">
         {/* top */}
         <div className="flex justify-between w-full">
@@ -19,14 +42,17 @@ export default function Calendar() {
         <div className="flex justify-between items-center">
           {/* Paginate */}
           <div className="flex items-center gap-3 text-text-foreground [&_svg]:size-6 ">
-            <Button className="hover:bg-transparent hover:border-primary border-2 hover:[&_svg]:text-primary" variant={"outline"} size={"icon"}><ChevronLeft /></Button>
-            <Button className="hover:bg-transparent hover:border-primary border-2 hover:[&_svg]:text-primary" variant={"outline"} size={"icon"}><ChevronRight /></Button>
-            <Button variant={"outline"} className="border-primary text-primary hover:text-text hover:bg-primary">Today</Button>
+            <Button onClick={() => changeMonth(-1)} className="hover:bg-transparent hover:border-primary border-2 hover:[&_svg]:text-primary" variant={"outline"} size={"icon"}><ChevronLeft /></Button>
+            <Button onClick={() => changeMonth(1)} className="hover:bg-transparent hover:border-primary border-2 hover:[&_svg]:text-primary" variant={"outline"} size={"icon"}><ChevronRight /></Button>
+            <Button onClick={() => {
+              setMonth(today.getMonth())
+              setYear(today.getFullYear())
+            }} variant={"outline"} className="border-primary text-primary hover:text-text hover:bg-primary">Today</Button>
           </div>
           {/* Mes */}
           <div>
             <p className="text-text text-lg font-semibold">
-              December 2024
+              {meses[month]} {year}
             </p>
           </div>
           {/* view */}
@@ -38,49 +64,8 @@ export default function Calendar() {
         </div>
       </CardHeader>
       <CardContent>
-        <CalendarTable />
+        <CalendarTable year={year} month={month} />
       </CardContent>
     </Card>
   )
 };
-
-
-function CalendarTable() {
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const daysInMonth = 30;
-  const firstDayOffset = 3;
-
-  const weeks = [];
-  let currentWeek = new Array(firstDayOffset).fill(null);
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    currentWeek.push(day);
-    if (currentWeek.length === 7 || day === daysInMonth) {
-      weeks.push(currentWeek);
-      currentWeek = [];
-    }
-  }
-
-  return (
-    <table className="text-text-foreground border-collapse border border-table-border w-full">
-      <thead>
-        <tr>
-          {daysOfWeek.map((day) => (
-            <th key={day} className="border border-table-border p-2">{day}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {weeks.map((week, index) => (
-          <tr key={index}>
-            {week.map((day, idx) => (
-              <td key={idx} className="border border-table-border p-2 align-text-top text-right h-36">
-                {day || ""}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}

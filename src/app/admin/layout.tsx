@@ -38,7 +38,7 @@ export default function RootLayout({
                   <BreadcrumbDynamic />
                 </div>
               </header>
-              <div className="w-full h-[calc(100vh-84px)]">
+              <div className="w-full h-[calc(100vh-84px)] overflow-auto scrollable">
                 {children}
               </div>
             </SidebarInset>
