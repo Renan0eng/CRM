@@ -1,9 +1,9 @@
-import Calendar from "@/views/calendar/page";
+import Agenda from "@/views/calendar/page";
 
 
 export default function app() {
   return (
-    <Calendar />
+    <Agenda />
   )
 }
 

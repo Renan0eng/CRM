@@ -2,17 +2,45 @@
 
 import CalendarTable from "@/components/tables/calendar/table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { meses } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn, meses } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { AdvancedColorPicker } from "@/components/advanced-color-picker";
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
-export default function Calendar() {
+
+export default function Agenda() {
 
   const today: Date = new Date();
 
   const [year, setYear] = useState<number>(today.getFullYear());
   const [month, setMonth] = useState<number>(today.getMonth());
+  const [evento, setEvento] = useState([
+    {
+      id: "sdasd",
+      nome: "Faculdade",
+      start: new Date(year, month, 10),
+      end: new Date(year, month, 11),
+      color: "#FF5733",
+    },
+    {
+      id: "sdasd2",
+      nome: "Reunião",
+      start: new Date(year, month, 15),
+      end: new Date(year, month, 17),
+      color: "#86ae4c",
+    },
+  ]);
 
   const changeMonth = (offset: number) => {
     let newMonth = month + offset;
@@ -28,15 +56,31 @@ export default function Calendar() {
     setYear(newYear);
   };
 
+
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
   return (
     <Card className="m-4 border-0">
       <CardHeader className="flex flex-col gap-4">
         {/* top */}
         <div className="flex justify-between w-full">
           <p className="text-text text-lg font-semibold">Calendar</p>
-          <Button>
-            <Plus /> Create Event
-          </Button>
+
+          <Dialog open={openDialog} onOpenChange={(e) => setOpenDialog(e)} >
+            <DialogTrigger asChild >
+              <Button>
+                <Plus /> Create Event
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="w-96 p-0 border-0 bg-transparent">
+              <FormTask
+                addOrUpdateEvento={() => {
+
+                }}
+                setOpenDialog={setOpenDialog}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
         {/* actions */}
         <div className="flex justify-between items-center">
@@ -64,8 +108,206 @@ export default function Calendar() {
         </div>
       </CardHeader>
       <CardContent>
-        <CalendarTable year={year} month={month} />
+        <CalendarTable year={year} month={month} evento={evento} />
       </CardContent>
     </Card>
   )
 };
+
+
+
+// Esquema de validação Zod
+const taskSchema = z.object({
+  nome: z.string().min(1, { message: "O nome é obrigatório" }),
+  start: z.date({ required_error: "A data de início é obrigatória" }),
+  end: z.date({ required_error: "A data de término é obrigatória" }),
+  color: z.string().min(1, { message: "A cor é obrigatória" }),
+});
+
+type TaskFormData = z.infer<typeof taskSchema>;
+
+function FormTask({
+  id,
+  addOrUpdateEvento,
+  setOpenDialog,
+}: {
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  id?: string;
+  addOrUpdateEvento: (
+    data: {
+      id?: string;
+      nome: string;
+      start: Date;
+      end: Date;
+      color: string;
+    }
+  ) => void;
+}) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+    control,
+  } = useForm<TaskFormData>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      nome: "",
+      start: new Date(),
+      end: new Date(),
+      color: "#FF5733",
+    },
+  });
+
+  // Atualiza os valores iniciais quando o ID é fornecido (edição)
+  useEffect(() => {
+    if (id) {
+      setValue("nome", "Faculdade"); // Exemplo de valor inicial
+      setValue("start", new Date(2023, 9, 10)); // Exemplo de valor inicial
+      setValue("end", new Date(2023, 9, 11)); // Exemplo de valor inicial
+      setValue("color", "#FF5733"); // Exemplo de valor inicial
+    }
+  }, [id, setValue]);
+
+  // Função para lidar com o envio do formulário
+  const onSubmit = async (data: TaskFormData) => {
+    addOrUpdateEvento({
+      id,
+      nome: data.nome,
+      start: data.start,
+      end: data.end,
+      color: data.color,
+    });
+    reset();
+    setOpenDialog(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Card className="w-full text-text border-0">
+        <CardHeader>
+          <CardTitle>{id ? "Editar Evento" : "Criar Evento"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid w-full items-center gap-4">
+            {/* Campo de Nome */}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="nome">Nome</Label>
+              <Input
+                id="nome"
+                placeholder="Nome do evento"
+                {...register("nome")}
+              />
+              {errors.nome && (
+                <p className="text-red-500 text-sm">{errors.nome.message}</p>
+              )}
+            </div>
+
+            {/* Campo de Data de Início */}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="start">Data de Início</Label>
+              <Controller
+                name="start"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal border-input-border bg-input-background",
+                          !watch("start") && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {watch("start")
+                          ? format(watch("start"), "PPP", { locale: ptBR })
+                          : <span>Selecione uma data</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(e) => field.onChange(e || new Date())}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.start && (
+                <p className="text-red-500 text-sm">{errors.start.message}</p>
+              )}
+            </div>
+
+            {/* Campo de Data de Término */}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="end">Data de Término</Label>
+              <Controller
+                name="end"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal border-input-border bg-input-background",
+                          !watch("end") && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {watch("end")
+                          ? format(watch("end"), "PPP", { locale: ptBR })
+                          : <span>Selecione uma data</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(e) => field.onChange(e || new Date())}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.end && (
+                <p className="text-red-500 text-sm">{errors.end.message}</p>
+              )}
+            </div>
+
+            {/* Campo de Cor */}
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="color">Cor</Label>
+              <Controller
+                name="color"
+                control={control}
+                render={({ field }) => (
+                  <AdvancedColorPicker
+                    color={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              {errors.color && (
+                <p className="text-red-500 text-sm">{errors.color.message}</p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <DialogClose asChild>
+            <Button variant="outline">Cancelar</Button>
+          </DialogClose>
+          <Button type="submit">{id ? "Editar" : "Adicionar"}</Button>
+        </CardFooter>
+      </Card>
+    </form>
+  );
+}
+
