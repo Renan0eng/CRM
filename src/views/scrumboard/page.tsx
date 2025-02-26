@@ -282,8 +282,6 @@ export default function TasksPage() {
     }
   };
 
-
-
   return (
     <div className="w-full p-8 flex flex-col gap-4 max-h-full scrollable overflow-scroll">
       {/* Btn new collun */}

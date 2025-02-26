@@ -150,7 +150,7 @@ export function AdvancedColorPicker({ color = "#000000", onChange }: ColorPicker
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
+        <Button variant="outline" className="w-full justify-start text-left font-normal">
           <div className="w-full flex items-center gap-2">
             <div
               className="h-4 w-4 rounded !bg-center !bg-cover transition-all border"

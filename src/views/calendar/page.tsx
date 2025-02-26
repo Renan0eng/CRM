@@ -59,8 +59,35 @@ export default function Agenda() {
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
+  const addOrUpdateEvento = (data: {
+    id?: string;
+    nome: string;
+    start: Date;
+    end: Date;
+    color: string;
+  }) => {
+    if (data.id) {
+      console.log("Iddata: ", data);
+
+      setEvento((prevEventos) =>
+        prevEventos.map((evento) =>
+          evento.id === data.id ? { ...evento, ...data } : evento
+        )
+      );
+    } else {
+      const newId = Math.random().toString(36).substr(2, 9);
+      console.log("data: ", newId);
+      setEvento((prevEventos) => [
+        ...prevEventos,
+        { ...data, id: newId },
+      ]);
+      console.log("evento: ", evento);
+
+    }
+  };
+
   return (
-    <Card className="m-4 border-0">
+    <Card className="m-4 border-0 ">
       <CardHeader className="flex flex-col gap-4">
         {/* top */}
         <div className="flex justify-between w-full">
@@ -74,17 +101,13 @@ export default function Agenda() {
             </DialogTrigger>
             <DialogContent className="w-96 p-0 border-0 bg-transparent">
               <FormTask
-                addOrUpdateEvento={() => {
-
-                }}
+                addOrUpdateEvento={addOrUpdateEvento}
                 setOpenDialog={setOpenDialog}
               />
             </DialogContent>
           </Dialog>
         </div>
-        {/* actions */}
         <div className="flex justify-between items-center">
-          {/* Paginate */}
           <div className="flex items-center gap-3 text-text-foreground [&_svg]:size-6 ">
             <Button onClick={() => changeMonth(-1)} className="hover:bg-transparent hover:border-primary border-2 hover:[&_svg]:text-primary" variant={"outline"} size={"icon"}><ChevronLeft /></Button>
             <Button onClick={() => changeMonth(1)} className="hover:bg-transparent hover:border-primary border-2 hover:[&_svg]:text-primary" variant={"outline"} size={"icon"}><ChevronRight /></Button>
@@ -93,13 +116,11 @@ export default function Agenda() {
               setYear(today.getFullYear())
             }} variant={"outline"} className="border-primary text-primary hover:text-text hover:bg-primary">Today</Button>
           </div>
-          {/* Mes */}
           <div>
             <p className="text-text text-lg font-semibold">
               {meses[month]} {year}
             </p>
           </div>
-          {/* view */}
           <div className="flex gap-3">
             <Button >Month</Button>
             <Button variant={"outline"} className="border-primary text-primary hover:text-text hover:bg-primary">Week</Button>
@@ -116,11 +137,12 @@ export default function Agenda() {
 
 
 
-// Esquema de validação Zod
 const taskSchema = z.object({
   nome: z.string().min(1, { message: "O nome é obrigatório" }),
-  start: z.date({ required_error: "A data de início é obrigatória" }),
-  end: z.date({ required_error: "A data de término é obrigatória" }),
+  dateRange: z.object({
+    start: z.date({ required_error: "A data de início é obrigatória" }),
+    end: z.date({ required_error: "A data de término é obrigatória" }),
+  }),
   color: z.string().min(1, { message: "A cor é obrigatória" }),
 });
 
@@ -155,29 +177,31 @@ function FormTask({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       nome: "",
-      start: new Date(),
-      end: new Date(),
+      dateRange: {
+        start: new Date(),
+        end: new Date(),
+      },
       color: "#FF5733",
     },
   });
 
-  // Atualiza os valores iniciais quando o ID é fornecido (edição)
   useEffect(() => {
     if (id) {
-      setValue("nome", "Faculdade"); // Exemplo de valor inicial
-      setValue("start", new Date(2023, 9, 10)); // Exemplo de valor inicial
-      setValue("end", new Date(2023, 9, 11)); // Exemplo de valor inicial
-      setValue("color", "#FF5733"); // Exemplo de valor inicial
+      setValue("nome", "Faculdade");
+      // setValue("dateRange", {end: new Date(2023, 9, 10)});
+      setValue("color", "#FF5733");
     }
   }, [id, setValue]);
 
   // Função para lidar com o envio do formulário
   const onSubmit = async (data: TaskFormData) => {
+    console.log("data: ", data);
+
     addOrUpdateEvento({
       id,
       nome: data.nome,
-      start: data.start,
-      end: data.end,
+      start: data.dateRange.start,
+      end: data.dateRange.end,
       color: data.color,
     });
     reset();
@@ -209,77 +233,53 @@ function FormTask({
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="start">Data de Início</Label>
               <Controller
-                name="start"
+                name="dateRange"
                 control={control}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant="outline"
+                        id="dateRange"
+                        variant={"outline"}
                         className={cn(
-                          "w-full justify-start text-left font-normal border-input-border bg-input-background",
-                          !watch("start") && "text-muted-foreground"
+                          "w-[300px] justify-start text-left font-normal",
+                          !field.value?.start && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {watch("start")
-                          ? format(watch("start"), "PPP", { locale: ptBR })
-                          : <span>Selecione uma data</span>}
+                        {field.value?.start ? (
+                          field.value?.end ? (
+                            <>
+                              {format(field.value.start, "LLL dd, y")} -{" "}
+                              {format(field.value.end, "LLL dd, y")}
+                            </>
+                          ) : (
+                            format(field.value.start, "LLL dd, y")
+                          )
+                        ) : (
+                          <span>Selecione um intervalo de datas</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 z-[9999]" align="start">
                       <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(e) => field.onChange(e || new Date())}
                         initialFocus
+                        mode="range"
+                        defaultMonth={field.value?.start}
+                        selected={{ from: field.value.start, to: field.value.end }}
+                        onSelect={(e) => field.onChange({
+                          start: e?.from, end: e?.to
+                        })}
                       />
                     </PopoverContent>
                   </Popover>
                 )}
               />
-              {errors.start && (
-                <p className="text-red-500 text-sm">{errors.start.message}</p>
+              {errors.dateRange && (
+                <p className="text-red-500 text-sm">{errors.dateRange.message}</p>
               )}
             </div>
 
-            {/* Campo de Data de Término */}
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="end">Data de Término</Label>
-              <Controller
-                name="end"
-                control={control}
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal border-input-border bg-input-background",
-                          !watch("end") && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {watch("end")
-                          ? format(watch("end"), "PPP", { locale: ptBR })
-                          : <span>Selecione uma data</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[9999]" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(e) => field.onChange(e || new Date())}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />
-              {errors.end && (
-                <p className="text-red-500 text-sm">{errors.end.message}</p>
-              )}
-            </div>
 
             {/* Campo de Cor */}
             <div className="flex flex-col space-y-1.5">
@@ -289,6 +289,7 @@ function FormTask({
                 control={control}
                 render={({ field }) => (
                   <AdvancedColorPicker
+
                     color={field.value}
                     onChange={field.onChange}
                   />

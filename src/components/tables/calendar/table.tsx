@@ -32,6 +32,10 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
   const [eventos, setEventos] = useState(evento);
 
   useEffect(() => {
+    setEventos(evento);
+  }, [evento])
+
+  useEffect(() => {
     const daysInMonth: number = new Date(year, month + 1, 0).getDate();
     const firstDay: number = new Date(year, month, 1).getDay();
     const prevMonthDays: number = new Date(year, month, 0).getDate();
@@ -44,6 +48,10 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
         const duracao = Math.ceil((e.end.getTime() - e.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         if (fullDate.toDateString() === e.start.toDateString()) {
           return [{ ...e, nome: e.nome, status: Status.Start, duracao, id: e.id, color: e.color, }];
+        } else if (fullDate > e.start && fullDate < e.end) {
+          return [{ ...e, nome: e.nome, status: Status.Middle, id: e.id }];
+        } else if (fullDate.toDateString() === e.end.toDateString()) {
+          return [{ ...e, nome: e.nome, status: Status.End, id: e.id }];
         }
         return [];
       });
@@ -62,6 +70,10 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
         const duracao = Math.ceil((e.end.getTime() - e.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         if (fullDate.toDateString() === e.start.toDateString()) {
           return [{ ...e, nome: e.nome, status: Status.Start, duracao, id: e.id, color: e.color }];
+        } else if (fullDate > e.start && fullDate < e.end) {
+          return [{ ...e, nome: e.nome, status: Status.Middle, id: e.id }];
+        } else if (fullDate.toDateString() === e.end.toDateString()) {
+          return [{ ...e, nome: e.nome, status: Status.End, id: e.id }];
         }
         return [];
       });
@@ -85,6 +97,10 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
         const duracao = Math.ceil((e.end.getTime() - e.start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         if (fullDate.toDateString() === e.start.toDateString()) {
           return [{ ...e, nome: e.nome, status: Status.Start, duracao, id: e.id, color: e.color }];
+        } else if (fullDate > e.start && fullDate < e.end) {
+          return [{ ...e, nome: e.nome, status: Status.Middle, id: e.id }];
+        } else if (fullDate.toDateString() === e.end.toDateString()) {
+          return [{ ...e, nome: e.nome, status: Status.End, id: e.id }];
         }
         return [];
       });
@@ -101,9 +117,15 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
   }, [year, month, eventos]);
 
   const handleDragEnd = (result: any) => {
-    const { source, destination, draggableId } = result;
+    let { source, destination, draggableId } = result;
 
     if (!eventos) return
+    if (!destination) return
+    if (!draggableId) return
+
+    const draggable = draggableId.split("/");
+
+    draggableId = draggable[0]
 
     const newEventos = [...eventos.filter((e) => e.id !== draggableId)];
 
@@ -134,8 +156,8 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
       }
     };
 
-    updateWidth(); // Chama imediatamente ao montar
-    window.addEventListener("resize", updateWidth); // Atualiza ao redimensionar a janela
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
 
     return () => {
       window.removeEventListener("resize", updateWidth);
@@ -167,14 +189,14 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
                       className={`border flex flex-col overflow-visible border-table-border align-text-top text-right ${isCurrentMonth ? "text-text" : "text-text-foreground"
                         }`}
                       style={{
-                        width: droppableWidth ? `${droppableWidth}px` : "auto", // Aplica a largura dinamicamente
+                        width: droppableWidth ? `${droppableWidth}px` : "auto",
                       }}
                     >
                       <div className="p-2">{day}</div>
                       <div className="flex flex-col gap-2">
                         {eventos &&
                           eventos.map((task, i) => (
-                            <Draggable key={task.id} draggableId={task.id} index={i}>
+                            <Draggable key={task.id + "/" + i} draggableId={task.id + "/" + i} index={i}>
                               {(provided, snapshot) => (
                                 <div
                                   ref={provided.innerRef}
@@ -186,9 +208,10 @@ function CalendarTable({ year, month, evento }: { year: number; month: number, e
                                     width: `${droppableWidth && `${droppableWidth * (task.duracao || 1)}px`}`,
                                     zIndex: snapshot.isDragging ? 1000 : 1,
                                   }}
-                                  className={`flex px-2 h-6 text-text bg-red-500
-                                    ${task.status === Status.Start ? "rounded-l-sm" : task.duracao == 1 && "rounded-sm"} 
-                                    ${task.status === Status.End && "rounded-r-sm !w-full"} 
+                                  className={`draggable-task flex px-2 h-6 bg-red-500 
+                                    ${task.status === Status.Start && "rounded-l-sm "} 
+                                    ${task.status === Status.Middle && "scale-x-105"} 
+                                    ${task.status === Status.End && "rounded-r-sm "} 
                                     ${snapshot.isDragging ? "shadow-lg scale-105" : ""}`}
                                 >
                                   {task.nome}

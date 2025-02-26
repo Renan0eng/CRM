@@ -13,14 +13,14 @@ export const data = {
       icon: Wrench,
       isActive: false,
       items: [
+        {
+          title: "Calendario",
+          url: "/admin/ferramentas/calendar",
+        },
         // {
         //   title: "WhatsApp",
         //   url: "/ferramentas/whatsapp",
         //   icon: SquareTerminal,
-        // },
-        // {
-        //   title: "Calendario",
-        //   url: "/ferramentas/calendar",
         // },
         {
           title: "Scrumboard",
